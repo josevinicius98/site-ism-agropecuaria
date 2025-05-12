@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    // Define o target JavaScript para ES2022, habilitando recursos modernos
+    "target": "ES2022",
+    // Inclui a biblioteca ES2023 para recursos de runtime e tipagens
+    "lib": ["ES2023"],
+    // Emite módulos no formato ESNext para compatibilidade com bundlers modernos
+    "module": "ESNext",
+    // Ignora checagem de definições de bibliotecas externas para acelerar compilação
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    // Resolutção de módulos otimizada para bundlers como Vite
+    "moduleResolution": "bundler",
+    // Permite importar arquivos .ts diretamente sem extensões alteradas
+    "allowImportingTsExtensions": true,
+    // Garante que cada arquivo seja tratado como módulo independente
+    "isolatedModules": true,
+    // Força detecção de módulos mesmo sem imports/exports explícitos
+    "moduleDetection": "force",
+    // Não emite arquivos de saída (usado apenas para checagem de tipos)
+    "noEmit": true,
+
+    /* Linting */
+    // Habilita todas as verificações estritas do TypeScript
+    "strict": true,
+    // Erro em variáveis locais não utilizadas
+    "noUnusedLocals": true,
+    // Erro em parâmetros de função não utilizados
+    "noUnusedParameters": true,
+    // Erro em casos de switch sem break ou retorno
+    "noFallthroughCasesInSwitch": true
+  },
+  // Inclui este arquivo de configuração na compilação do projeto
+  "include": ["vite.config.ts"]
+}

@@ -1,0 +1,90 @@
+@tailwind base; /* Importa estilos base do Tailwind */
+@tailwind components; /* Importa componentes padrão do Tailwind */
+@tailwind utilities; /* Importa utilitários (classes utilitárias) do Tailwind */
+
+@layer base {
+  html {
+    scroll-behavior: smooth; /* Habilita rolagem suave em toda a página */
+  }
+  
+  body {
+    @apply font-sans text-gray-800 antialiased; /* Aplica fonte sem serifa, cor de texto cinza escuro e antialiasing */
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold text-primary leading-tight; /* Estiliza títulos com fonte display, peso semibold, cor primária e espaçamento reduzido */
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl; /* Container centralizado com padding responsivo e largura máxima */
+  }
+  
+  .btn {
+    @apply inline-block px-6 py-3 rounded-md transition-all duration-300 text-center font-medium; /* Estilo base para botões: inline-block, padding, borda arredondada, transições */
+  }
+  
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-light; /* Botão primário com fundo primário, texto branco e hover */
+  }
+  
+  .btn-secondary {
+    @apply btn bg-secondary text-primary hover:bg-secondary-light; /* Botão secundário com cores invertidas e hover */
+  }
+  
+  .btn-outline {
+    @apply btn border-2 border-secondary text-secondary hover:bg-secondary hover:text-primary; /* Botão outline com borda secundária e hover que preenche */
+  }
+  
+  .section-title {
+    @apply text-3xl md:text-4xl lg:text-5xl mb-6 relative font-display; /* Estiliza títulos de seção com tamanhos responsivos e fonte display */
+  }
+  
+  .section-title::after {
+    content: ''; /* Pseudo-elemento decorativo */
+    @apply block w-20 h-1 bg-secondary mt-4; /* Linha abaixo do título com largura fixa e cor secundária */
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg; /* Card com sombra, bordas arredondadas e efeito hover */
+  }
+  
+  .nav-link {
+    @apply relative font-medium text-white hover:text-secondary transition-colors duration-300; /* Link de navegação com transição de cor */
+    @apply after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-secondary after:transition-all after:duration-300; /* Pseudo-elemento underline animado */
+    @apply hover:after:w-full; /* Expande underline ao hover */
+  }
+  
+  .active-nav-link {
+    @apply text-secondary after:w-full; /* Link ativo com cor secundária e underline completo */
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.8s ease-out; /* Animação fade up em 0.8s */
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out; /* Animação fade in em 0.8s */
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0; /* Inicia invisível */
+    transform: translateY(20px); /* Posicionado 20px abaixo */
+  }
+  to {
+    opacity: 1; /* Termina visível */
+    transform: translateY(0); /* Move para posição original */
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0; /* Inicia invisível */
+  }
+  to {
+    opacity: 1; /* Termina visível */
+  }
+}
