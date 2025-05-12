@@ -26,3 +26,4 @@ dist-ssr/        # Arquivos de build para server-side rendering
 
 # Ignora arquivo de variáveis de ambiente
 .env             # Arquivo com variáveis sensíveis de ambiente
+node_modules
