@@ -18,7 +18,7 @@
 
 @layer components {
   .container-custom {
-    @apply container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl; /* Container centralizado com padding responsivo e largura máxima */
+    @apply px-4 sm:px-6 lg:px-8; /* Container centralizado com padding responsivo e largura máxima */
   }
   
   .btn {
