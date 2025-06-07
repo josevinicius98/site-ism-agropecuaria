@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import mysql from 'mysql2/promise';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import multer from 'multer';
 import path from 'path';
 import cron from 'node-cron'; // Importar node-cron
