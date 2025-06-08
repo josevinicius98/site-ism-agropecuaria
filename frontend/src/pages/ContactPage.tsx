@@ -62,7 +62,7 @@ const ContactPage: React.FC = () => {
         }}
         title="Entre em Contato"
         subtitle="Estamos à disposição para atender suas necessidades e responder suas dúvidas"
-        backgroundClass="bg-[url('../src/assets/boipagecontato.jpeg')] bg-cover bg-center bg-no-repeat bg-black/40 bg-blend-darken"
+        backgroundClass="bg-[url('/assets/boipagecontato.jpeg')] bg-cover bg-center bg-no-repeat bg-black/40 bg-blend-darken"
       />
 
       <section className="py-20 bg-white">

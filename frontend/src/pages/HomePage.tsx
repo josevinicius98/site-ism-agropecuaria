@@ -108,7 +108,7 @@ const HomePage: React.FC = () => {
             </div>
             <div className="relative rounded-lg overflow-hidden shadow-xl h-[400px]">
               <img
-                src="../src/assets/boihomepage.jpeg"
+                src="/assets/boihomepage.jpeg"
                 alt="Gado ISM Agropecuária"
                 className="w-full h-full object-cover"
               />
@@ -124,7 +124,7 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1 relative rounded-lg overflow-hidden shadow-xl h-[400px]">
               <img
-                src="../src/assets/sojahomepage.jpeg"
+                src="/assets/sojahomepage.jpeg"
                 alt="Plantação ISM Agropecuária"
                 className="w-full h-full object-cover"
               />

@@ -14,7 +14,7 @@ const AboutPage: React.FC = () => {
       {/* Seção de destaque da página (hero/banner) */}
       <Hero
         topImage={{
-          src: '../src/assets/logosemf.png',       // coloque sua imagem em public/assets/
+          src: "/assets/logosemf.png",       // coloque sua imagem em public/assets/
           alt: 'Logo ISM Agropecuária',
           className: 'mx-auto mb-4 w-24 h-auto',
         }}
@@ -55,28 +55,28 @@ const AboutPage: React.FC = () => {
               {/* Cada imagem representa uma etapa ou aspecto da empresa */}
               <div className="rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img 
-                  src='/assets/diretores.jpeg' 
+                  src="/assets/diretores.jpeg" 
                   alt="História da ISM" 
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img 
-                  src='/assets/pecuaria4.jpeg'
+                  src="/assets/pecuaria4.jpeg"
                   alt="Fazenda ISM" 
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img 
-                  src='/assets/pecuaria3.jpeg' 
+                  src="/assets/pecuaria3.jpeg"
                   alt="Agricultura ISM" 
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img 
-                  src='/assets/pecuaria2.jpeg' 
+                  src= "/assets/logosemf.png"
                   alt="Tecnologia ISM" 
                   className="w-full h-full object-cover"
                 />

@@ -53,13 +53,13 @@ const ActivitiesPage: React.FC = () => {
       {/* Seção principal com título e subtítulo */}
       <Hero
         topImage={{
-          src: '/assets/logosemf.png',       // coloque sua imagem em public/assets/
+          src: "/assets/logosemf.png",       // coloque sua imagem em public/assets/
           alt: 'Logo ISM Agropecuária',
           className: 'mx-auto mb-4 w-24 h-auto',
         }}
         title="Nossas Atividades" // Título da seção hero
         subtitle="Conheça em detalhes as áreas de atuação da ISM Agropecuária" // Subtítulo explicativo
-        backgroundClass="bg-[url('../src/assets/sojahomepage.jpeg')]   bg-cover bg-center bg-no-repeat bg-black/40 bg-blend-darken" // Classe de fundo para estilização
+        backgroundClass="bg-[url('/assets/sojahomepage.jpeg')]   bg-cover bg-center bg-no-repeat bg-black/40 bg-blend-darken" // Classe de fundo para estilização
       />
 
       {/* Seção de Pecuária */}
