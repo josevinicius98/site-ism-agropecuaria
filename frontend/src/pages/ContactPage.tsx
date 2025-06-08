@@ -56,7 +56,7 @@ const ContactPage: React.FC = () => {
       {/* Banner de topo */}
       <Hero
         topImage={{
-          src: '../src/assets/logosemf.png',
+          src: '/assets/logosemf.png',
           alt: 'Logo ISM Agropecuária',
           className: 'mx-auto mb-4 w-24 h-auto',
         }}

@@ -6,19 +6,20 @@ import 'slick-carousel/slick/slick-theme.css';
 import ActivityCard from './ActivityCard'; // seu card existente
 
 // Dados iniciais (6 fotos) {/*caso queria escrever um título na foto escrever dento do ''*/},
-const photos = [                                                                                                            
-  { id: 1, src: '../src/assets/gl1.jpeg', name: '' },
-  { id: 2, src: '../src/assets/gl2.jpeg', name: '' },
-  { id: 3, src: '../src/assets/gl4.jpeg', name: '' },
-  { id: 4, src: '../src/assets/gl5.jpeg', name: '' },
-  { id: 5, src: '../src/assets/gl6.jpeg', name: '' },
-  { id: 6, src: '../src/assets/gl8.jpeg', name: '' },
-  { id: 7, src: '../src/assets/gl9.jpeg', name: '' },
-  { id: 8, src: '../src/assets/gl10.jpeg', name: '' },
-  { id: 9, src: '../src/assets/gl11.jpeg', name: '' },
-  { id: 10, src: '../src/assets/gl12.jpeg', name: '' },
-  { id: 11, src: '../src/assets/gl13.jpeg', name: '' },
+const photos = [
+  { id: 1, src: '/assets/gl1.jpeg', name: '' }, 
+  { id: 2, src: '/assets/gl2.jpeg', name: '' },
+  { id: 3, src: '/assets/gl4.jpeg', name: '' }, 
+  { id: 4, src: '/assets/gl5.jpeg', name: '' }, 
+  { id: 5, src: '/assets/gl6.jpeg', name: '' }, 
+  { id: 6, src: '/assets/gl8.jpeg', name: '' }, 
+  { id: 7, src: '/assets/gl9.jpeg', name: '' }, 
+  { id: 8, src: '/assets/gl10.jpeg', name: '' }, 
+  { id: 9, src: '/assets/gl11.jpeg', name: '' }, 
+  { id: 10, src: '/assets/gl12.jpeg', name: '' }, 
+  { id: 11, src: '/assets/gl13.jpeg', name: '' }, 
 ];
+
 
 const TeamCarousel: React.FC = () => {
   const settings = {

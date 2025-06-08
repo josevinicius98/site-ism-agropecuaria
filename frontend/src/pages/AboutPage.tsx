@@ -20,7 +20,7 @@ const AboutPage: React.FC = () => {
         }}
         title="Sobre a ISM Agropecuária"
         subtitle="Conheça nossa história, valores e compromisso com a excelência agropecuária"
-        backgroundClass="bg-[url('../src/assets/boiadasobrenos.jpeg')] bg-cover bg-center bg-no-repeat bg-black/40 bg-blend-darken"
+        backgroundClass="bg-[url('/assets/boiadasobrenos.jpeg')] bg-cover bg-center bg-no-repeat bg-black/40 bg-blend-darken"
       />
 
       {/* Seção: Nossa História */}
@@ -55,28 +55,28 @@ const AboutPage: React.FC = () => {
               {/* Cada imagem representa uma etapa ou aspecto da empresa */}
               <div className="rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img 
-                  src='../src/assets/diretores.jpeg' 
+                  src='/assets/diretores.jpeg' 
                   alt="História da ISM" 
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img 
-                  src='../src/assets/pecuaria4.jpeg'
+                  src='/assets/pecuaria4.jpeg'
                   alt="Fazenda ISM" 
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img 
-                  src='../src/assets/pecuaria3.jpeg' 
+                  src='/assets/pecuaria3.jpeg' 
                   alt="Agricultura ISM" 
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img 
-                  src='../src/assets/pecuaria2.jpeg' 
+                  src='/assets/pecuaria2.jpeg' 
                   alt="Tecnologia ISM" 
                   className="w-full h-full object-cover"
                 />

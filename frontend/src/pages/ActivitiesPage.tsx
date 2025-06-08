@@ -13,17 +13,17 @@ const ActivitiesPage: React.FC = () => {
   // Define as imagens para a galeria de pecuária (livestock)
   const livestockImages = [
     {
-      src: '../src/assets/02.jpeg', // URL da imagem
+      src: '/assets/02.jpeg', // URL da imagem
       alt: "Gado nelore", // Texto alternativo para acessibilidade
       caption: "Gado de corte de alta qualidade" // Legenda da imagem
     },
     {
-      src: '../src/assets/pec2.jpeg',
+      src: '/assets/pec2.jpeg',
       alt: "Curral de manejo",
       caption: "Estrutura para manejo do rebanho"
     },
     {
-      src: '../src/assets/01.jpeg',
+      src: '/assets/01.jpeg',
       alt: "Nutrição animal",
       caption: "Suplementação alimentar"
     },
@@ -32,17 +32,17 @@ const ActivitiesPage: React.FC = () => {
   // Define as imagens para a galeria de agricultura (agriculture)
   const agricultureImages = [
     {
-      src: "/src/assets/agr4.jpeg",
+      src: "/assets/agr4.jpeg",
       alt: "Plantação de soja",
       caption: "Cultivo com alta produtividade"
     },
     {
-      src: "/src/assets/agr6.jpeg",
+      src: "/assets/agr6.jpeg",
       alt: "Plantação de milho",
       caption: "Uso de tecnologia e maquinário durante todo o processo"
     },
     {
-      src: "/src/assets/cana_agricultura.jpeg",
+      src: "/assets/cana_agricultura.jpeg",
       alt: "Colheita de cana",
       caption: "Colheita mecanizada de cana-de-açúcar"
     },
@@ -53,7 +53,7 @@ const ActivitiesPage: React.FC = () => {
       {/* Seção principal com título e subtítulo */}
       <Hero
         topImage={{
-          src: '../src/assets/logosemf.png',       // coloque sua imagem em public/assets/
+          src: '/assets/logosemf.png',       // coloque sua imagem em public/assets/
           alt: 'Logo ISM Agropecuária',
           className: 'mx-auto mb-4 w-24 h-auto',
         }}
@@ -95,7 +95,7 @@ Nosso time reúne zootecnistas, veterinários e engenheiros agrônomos, todos fo
               {/* Imagem de destaque ocupando duas colunas */}
               <div className="col-span-2 rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img
-                  src="../src/assets/pec1.jpeg"
+                  src="/assets/pec1.jpeg"
                   alt="Pecuária ISM"
                   className="w-full h-full object-cover"
                 />
@@ -103,14 +103,14 @@ Nosso time reúne zootecnistas, veterinários e engenheiros agrônomos, todos fo
               {/* Outras imagens menores */}
               <div className="rounded-lg overflow-hidden shadow-md">
                 <img
-                  src="../src/assets/03.jpeg"
+                  src="/assets/03.jpeg"
                   alt="Gado em pastagem"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-md">
                 <img
-                  src="../src/assets/pec3.jpeg"
+                  src="/assets/pec3.jpeg"
                   alt="Manejo de gado"
                   className="w-full h-full object-cover"
                 />
@@ -161,21 +161,21 @@ Nosso time reúne zootecnistas, veterinários e engenheiros agrônomos, todos fo
             <div className="order-2 lg:order-1 grid grid-cols-2 gap-4">
               <div className="col-span-2 rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img
-                  src="/src/assets/agr1.jpeg"
+                  src="/assets/agr1.jpeg"
                   alt="Agricultura ISM"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-md">
                 <img
-                  src="/src/assets/agr2.jpeg"
+                  src="/assets/agr2.jpeg"
                   alt="Plantação"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-md">
                 <img
-                  src="/src/assets/agr3.jpeg"
+                  src="/assets/agr3.jpeg"
                   alt="Colheita"
                   className="w-full h-full object-cover"
                 />
@@ -284,28 +284,28 @@ Nosso sistema integrado permite alternar culturas de forma estratégica — milh
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-lg overflow-hidden shadow-lg">
                 <img
-                  src="/src/assets/agr2.jpeg"
+                  src="/assets/agr2.jpeg"
                   alt="Sustentabilidade"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-lg">
                 <img
-                  src="/src/assets/s2.jpeg"
+                  src="/assets/s2.jpeg"
                   alt="Práticas sustentáveis"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-lg">
                 <img
-                  src="/src/assets/s3.jpg"
+                  src="/assets/s3.jpg"
                   alt="Tecnologia no campo"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-lg">
                 <img
-                  src="/src/assets/s4.jpg"
+                  src="/assets/s4.jpg"
                   alt="Monitoramento"
                   className="w-full h-full object-cover"
                 />

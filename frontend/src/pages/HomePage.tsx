@@ -11,21 +11,23 @@ import ActivityCard from '../components/ActivityCard';
 import { Leaf, BarChartHorizontal, RotateCw, Users, ShieldCheck } from 'lucide-react';
 import { GiCow } from 'react-icons/gi';
 
+
 const HomePage: React.FC = () => {
   const navigate = useNavigate(); // inicializa o navigate
 
   return (
     <div>
       {/* Hero Section: Banner inicial com CTA */}
-      <Hero
+       <Hero
         topImage={{
-          src: '../src/assets/logosemf.png',       // coloque sua imagem em public/assets/
+          src: '/assets/logosemf.png',       // Caminho corrigido
           alt: 'Logo ISM Agropecuária',
           className: 'mx-auto mb-4 w-24 h-auto',
         }}
         title="ISM Agropecuária"
         subtitle="Excelência na produção agropecuária com compromisso sustentável e inovação tecnológica"
-        backgroundClass="bg-[url('../src/assets/boi_inicial2.jpeg')]   bg-cover bg-center bg-no-repeat bg-black/40 bg-blend-darken"
+        // Caminho corrigido para a imagem de fundo
+        backgroundClass="bg-[url('/assets/boi_inicial2.jpeg')] bg-cover bg-center bg-no-repeat bg-black/40 bg-blend-darken"
         ctaText="Conheça Nossas Atividades"
         ctaAction={() => {
           document
