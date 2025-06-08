@@ -1,3 +1,4 @@
+// backend/server.js
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
@@ -5,36 +6,43 @@ import mysql from 'mysql2/promise';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
-import path from 'path';
-import cron from 'node-cron'; // Importar node-cron
+// import path from 'path'; // Não precisará mais, pois o Multer não salvará localmente
+import cron from 'node-cron';
+import { v2 as cloudinary } from 'cloudinary'; // Importar Cloudinary para uploads
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:5173' }));
+
+// --- Configuração CORS: CRUCIAL para comunicação entre Front-end e Back-end ---
+// Use a variável de ambiente para o URL do seu front-end no Render.
+// Durante o desenvolvimento, 'http://localhost:5173' funciona.
+app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
-// -------- MULTER STORAGE COM EXTENSÃO ORIGINAL --------
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const name = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
-    cb(null, name);
-  }
+// --- CONFIGURAÇÃO DO CLOUDINARY ---
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-const upload = multer({ storage });
-// ------------------------------------------------------
 
+// Configuração do Multer para armazenar em memória (antes de enviar para Cloudinary)
+// Isso é necessário porque o Cloudinary vai precisar do buffer do arquivo.
+const upload = multer({ storage: multer.memoryStorage() });
+// -----------------------------------
+
+// --- CONEXÃO COM O BANCO DE DADOS (MYSQL NO RAILWAY) ---
+// O Railway injetará as variáveis de ambiente para o seu banco de dados MySQL.
 const pool = await mysql.createPool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.MYSQLHOST,     // Railway usa MYSQLHOST, não DB_HOST
+  port: process.env.MYSQLPORT ? parseInt(process.env.MYSQLPORT) : 3306, // Railway usa MYSQLPORT
+  user: process.env.MYSQLUSER,     // Railway usa MYSQLUSER
+  password: process.env.MYSQLPASSWORD, // Railway usa MYSQLPASSWORD
+  database: process.env.MYSQLDATABASE, // Railway usa MYSQLDATABASE
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  connectTimeout: 10000
 });
-
 
 const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta-para-dev';
 
@@ -389,8 +397,36 @@ app.post('/api/atendimentos/:id/upload', auth, upload.single('arquivo'), async (
   res.json({ url: urlArquivo, nome: nomeArquivo });
 });
 // ----------------------------------------------------------------------
+app.post('/api/atendimentos/:id/upload', auth, upload.single('arquivo'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Arquivo não enviado.' });
 
-app.use('/uploads', express.static('uploads'));
+  try {
+    const atendimentoId = req.params.id;
+    const remetente = ['admin', 'rh', 'compliance'].includes(req.role) ? 'suporte' : 'usuario';
+
+    // Upload do arquivo para o Cloudinary
+    const result = await cloudinary.uploader.upload(
+      `data:<span class="math-inline">\{req\.file\.mimetype\};base64,</span>{req.file.buffer.toString('base64')}`,
+      {
+        folder: `ism-agropecuaria/atendimentos/${atendimentoId}`, // Organize seus uploads
+        resource_type: 'auto', // Detecta automaticamente o tipo de recurso
+      }
+    );
+
+    const urlArquivo = result.secure_url; // URL HTTPS do arquivo no Cloudinary
+    const nomeArquivo = req.file.originalname;
+
+    await pool.query(
+      'INSERT INTO mensagens_atendimento (atendimento_id, remetente, mensagem, tipo) VALUES (?, ?, ?, ?)',
+      [atendimentoId, remetente, JSON.stringify({ url: urlArquivo, nome: nomeArquivo }), 'arquivo']
+    );
+    res.json({ url: urlArquivo, nome: nomeArquivo });
+  } catch (err) {
+    console.error('Erro ao enviar arquivo para Cloudinary ou DB:', err);
+    return res.status(500).json({ error: 'Erro ao processar upload de arquivo.' });
+  }
+}); 
+
 
 const PORT = process.env.PORT || 3001;
 

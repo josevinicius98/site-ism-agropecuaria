@@ -86,24 +86,24 @@ const AtendimentoChatSuportePage: React.FC = () => {
               }`}>
                 {/* Tratamento arquivo/texto */}
                 {m.tipo === 'arquivo' ? (() => {
-                  let arquivo = { url: '', nome: '' };
-                  try { arquivo = JSON.parse(m.mensagem); } catch {}
-                  const urlCompleta = arquivo.url.startsWith('http')
-                    ? arquivo.url
-                    : `http://localhost:3001${arquivo.url}`;
-                  if (arquivo.url.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                    let arquivo = { url: '', nome: '' };
+                     try { arquivo = JSON.parse(m.mensagem); } catch {}
+                    // REMOVA A LINHA ABAIXO (ou similar):
+                    // const urlCompleta = arquivo.url.startsWith('http') ? arquivo.url : `http://localhost:3001${arquivo.url}`;
+                    // USE DIRETAMENTE 'arquivo.url'
+                    if (arquivo.url.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                      return (
+                        <a href={arquivo.url} target="_blank" rel="noopener noreferrer"> {/* Use arquivo.url diretamente */}
+                          <img src={arquivo.url} alt={arquivo.nome} className="max-h-40 rounded" />
+                          <div className="text-xs mt-1 underline">{arquivo.nome}</div>
+                        </a>
+                      );
+                    }
                     return (
-                      <a href={urlCompleta} target="_blank" rel="noopener noreferrer">
-                        <img src={urlCompleta} alt={arquivo.nome} className="max-h-40 rounded" />
-                        <div className="text-xs mt-1 underline">{arquivo.nome}</div>
+                      <a href={arquivo.url} target="_blank" rel="noopener noreferrer" className="underline"> {/* Use arquivo.url diretamente */}
+                        {arquivo.nome}
                       </a>
                     );
-                  }
-                  return (
-                    <a href={urlCompleta} target="_blank" rel="noopener noreferrer" className="underline">
-                      {arquivo.nome}
-                    </a>
-                  );
                 })() : (
                   <div className="text-sm">{m.mensagem}</div>
                 )}

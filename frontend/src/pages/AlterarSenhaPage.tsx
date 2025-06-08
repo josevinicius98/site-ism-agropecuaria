@@ -31,35 +31,38 @@ const AlterarSenhaPage: React.FC = () => {
     }
   }, [user, token, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setMessage('');
+      const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        setMessage('');
 
-    if (newPassword !== confirmNewPassword) {
-      setError('A nova senha e a confirmação não coincidem.');
-      setLoading(false);
-      return;
-    }
-    if (newPassword.length < 6) {
-      setError('A nova senha deve ter no mínimo 6 caracteres.');
-      setLoading(false);
-      return;
-    }
+        if (newPassword !== confirmNewPassword) {
+          setError('A nova senha e a confirmação não coincidem.');
+          setLoading(false);
+          return;
+        }
+        if (newPassword.length < 6) {
+          setError('A nova senha deve ter no mínimo 6 caracteres.');
+          setLoading(false);
+          return;
+        }
 
-    try {
-      const response = await fetch('http://localhost:3001/api/alterar-senha', { // Confirme a URL da sua API
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          senhaAtual: currentPassword,
-          novaSenha: newPassword
-        }),
-      });
+
+      try {
+        const response = await fetch('/api/alterar-senha', { // Alterado para caminho relativo
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            senhaAtual: currentPassword,
+            novaSenha: newPassword
+          }),
+        });
+        // Verifica se a resposta foi bem-sucedida
+        // Se não, lança um erro com a mensagem do backend
 
       if (!response.ok) {
         const errData = await response.json();
@@ -76,12 +79,12 @@ const AlterarSenhaPage: React.FC = () => {
         navigate('/portal');
       }, 2000);
 
-    } catch (err: any) {
-      setError(err.message || 'Ocorreu um erro. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
+      } catch (err: any) {
+        setError(err.message || 'Ocorreu um erro. Tente novamente.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
   // Se o usuário não estiver carregado ou logado, exibe mensagem de redirecionamento.
   // O useEffect já lida com o redirecionamento real.
