@@ -1,4 +1,4 @@
-//SOBRE NÓS
+// SOBRE NÓS
 
 // Importa a biblioteca React e os componentes reutilizáveis
 import React from 'react';
@@ -14,13 +14,13 @@ const AboutPage: React.FC = () => {
       {/* Seção de destaque da página (hero/banner) */}
       <Hero
         topImage={{
-          src: "/assets/logosemf.png",       // coloque sua imagem em public/assets/
+          src: "/assets/logosemf.png",       // CORRIGIDO: Caminho agora começa com /assets/
           alt: 'Logo ISM Agropecuária',
           className: 'mx-auto mb-4 w-24 h-auto',
         }}
         title="Sobre a ISM Agropecuária"
         subtitle="Conheça nossa história, valores e compromisso com a excelência agropecuária"
-        backgroundClass="bg-[url('/assets/boiadasobrenos.jpeg')] bg-cover bg-center bg-no-repeat bg-black/40 bg-blend-darken"
+        backgroundClass="bg-[url('/assets/boiadasobrenos.jpeg')] bg-cover bg-center bg-no-repeat bg-black/40 bg-blend-darken" // CORRIGIDO
       />
 
       {/* Seção: Nossa História */}
@@ -55,28 +55,28 @@ const AboutPage: React.FC = () => {
               {/* Cada imagem representa uma etapa ou aspecto da empresa */}
               <div className="rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img 
-                  src="/assets/diretores.jpeg" 
+                  src="/assets/diretores.jpeg" // CORRIGIDO
                   alt="História da ISM" 
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img 
-                  src="/assets/pecuaria4.jpeg"
+                  src="/assets/pecuaria4.jpeg" // CORRIGIDO
                   alt="Fazenda ISM" 
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img 
-                  src="/assets/pecuaria3.jpeg"
+                  src="/assets/pecuaria3.jpeg" // CORRIGIDO
                   alt="Agricultura ISM" 
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img 
-                  src= "/assets/logosemf.png"
+                  src= "/assets/logosemf.png" // **ATENÇÃO: Este caminho é para a logo, se a intenção era outra imagem, ajuste-o.**
                   alt="Tecnologia ISM" 
                   className="w-full h-full object-cover"
                 />

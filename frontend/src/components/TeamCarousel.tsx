@@ -7,9 +7,9 @@ import ActivityCard from './ActivityCard'; // seu card existente
 
 // Dados iniciais (6 fotos) {/*caso queria escrever um título na foto escrever dento do ''*/},
 const photos = [
-  { id: 1, src: "/assets/gl1.jpeg", name: '' }, 
-  { id: 2, src: "/assets/gl2.jpeg", name: '' },
-  { id: 3, src: "/assets/gl4.jpeg", name: '' }, 
+  { id: 1, src: '/assets/gl1.jpeg', name: '' }, 
+  { id: 2, src: '/assets/gl2.jpeg', name: '' },
+  { id: 3, src: '/assets/gl4.jpeg', name: '' }, 
   { id: 4, src: '/assets/gl5.jpeg', name: '' }, 
   { id: 5, src: '/assets/gl6.jpeg', name: '' }, 
   { id: 6, src: '/assets/gl8.jpeg', name: '' }, 
