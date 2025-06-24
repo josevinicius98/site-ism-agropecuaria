@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
@@ -19,6 +20,8 @@
     "node-cron": "^4.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "jest": "^30.0.2",
+    "nodemon": "^3.0.2",
+    "supertest": "^7.1.1"
   }
 }
