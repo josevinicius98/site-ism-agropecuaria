@@ -430,6 +430,10 @@ app.post('/api/atendimentos/:id/upload', auth, upload.single('arquivo'), async (
 
 const PORT = process.env.PORT || 3001;
 
-app.listen(PORT, () => {
-  console.log(`API rodando na porta ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`API rodando na porta ${PORT}`);
+  });
+}
+
+export default app;
