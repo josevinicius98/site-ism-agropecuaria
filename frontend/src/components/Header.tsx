@@ -69,7 +69,7 @@ const Header: React.FC<HeaderProps> = ({
           className="cursor-pointer flex items-center"
           onClick={() => handleNavClick('home')}
         >
-          <img src="src=/assets/logosemf.png" alt="ISM Agropecuária" className="h-12 sm:h-14 mr-2" />
+          <img src="../assets/logosemf.png" alt="ISM Agropecuária" className="h-12 sm:h-14 mr-2" />
           <span className="hidden md:block text-white font-display text-xl">
             ISM <span className="text-secondary">Agropecuária</span>
           </span>
