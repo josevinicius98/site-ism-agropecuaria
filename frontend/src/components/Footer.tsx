@@ -34,7 +34,7 @@ const Footer: React.FC<FooterProps> = ({ setCurrentPage }) => {
           {/* Bloco 1 - Logo e Sobre */}
           <div className="space-y-4">
             <img 
-              src="src=/assets/logosemf.png" 
+              src="../assets/logosemf.png" 
               alt="ISM Agropecuária" 
               className="h-16"
             />
