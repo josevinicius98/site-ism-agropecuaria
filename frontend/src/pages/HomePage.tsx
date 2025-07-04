@@ -1,8 +1,6 @@
 //INICIO
 
 // src/pages/HomePage.tsx
-
-// src/pages/HomePage.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom'; // ← hook para navegar
 import Hero from '../components/Hero';
