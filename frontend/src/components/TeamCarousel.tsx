@@ -7,17 +7,17 @@ import ActivityCard from './ActivityCard'; // seu card existente
 
 // Dados iniciais (6 fotos) {/*caso queria escrever um título na foto escrever dento do ''*/},
 const photos = [
-  { id: 1, src: '/assets/gl1.jpeg', name: '' }, 
-  { id: 2, src: '/assets/gl2.jpeg', name: '' },
-  { id: 3, src: '/assets/gl4.jpeg', name: '' }, 
-  { id: 4, src: '/assets/gl5.jpeg', name: '' }, 
-  { id: 5, src: '/assets/gl6.jpeg', name: '' }, 
-  { id: 6, src: '/assets/gl8.jpeg', name: '' }, 
-  { id: 7, src: '/assets/gl9.jpeg', name: '' }, 
-  { id: 8, src: '/assets/gl10.jpeg', name: '' }, 
-  { id: 9, src: '/assets/gl11.jpeg', name: '' }, 
-  { id: 10, src: '/assets/gl12.jpeg', name: '' }, 
-  { id: 11, src: '/assets/gl13.jpeg', name: '' }, 
+  { id: 1, src: '../assets/gl1.jpeg', name: '1' }, 
+  { id: 2, src: '../assets/gl2.jpeg', name: '2' },
+  { id: 3, src: '../assets/gl4.jpeg', name: '3' }, 
+  { id: 4, src: '../assets/gl5.jpeg', name: '4' }, 
+  { id: 5, src: '../assets/gl6.jpeg', name: '5' }, 
+  { id: 6, src: '../assets/gl8.jpeg', name: '6' }, 
+  { id: 7, src: '../assets/gl9.jpeg', name: '7' }, 
+  { id: 8, src: '../assets/gl10.jpeg', name: '8' }, 
+  { id: 9, src: '../assets/gl11.jpeg', name: '9' }, 
+  { id: 10, src: '../assets/gl12.jpeg', name: '10' }, 
+  { id: 11, src: '../assets/gl13.jpeg', name: '11' }, 
 ];
 
 
