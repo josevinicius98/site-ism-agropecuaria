@@ -30,19 +30,18 @@ cloudinary.config({
 const upload = multer({ storage: multer.memoryStorage() });
 // -----------------------------------
 
-// --- CONEXÃO COM O BANCO DE DADOS (MYSQL NO RAILWAY) ---
-// O Railway injetará as variáveis de ambiente para o seu banco de dados MySQL.
-const pool = await mysql.createPool({
-  host: process.env.MYSQLHOST,     // Railway usa MYSQLHOST, não DB_HOST
-  port: process.env.MYSQLPORT ? parseInt(process.env.MYSQLPORT) : 3306, // Railway usa MYSQLPORT
-  user: process.env.MYSQLUSER,     // Railway usa MYSQLUSER
-  password: process.env.MYSQLPASSWORD, // Railway usa MYSQLPASSWORD
-  database: process.env.MYSQLDATABASE, // Railway usa MYSQLDATABASE
+// Configuração do MySQL
+const pool = mysql.createPool({
+  host: 'localhost',        // string!
+  port: 3306,
+  user: 'root',             // string!
+  password: '06081998',     // string!
+  database: 'portal_db',    // string!
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
   connectTimeout: 10000
-});
+})
 
 const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta-para-dev';
 
@@ -258,6 +257,45 @@ cron.schedule('0 0 * * *', async () => {
 
 // Outras Rotas (sem alterações significativas para esta funcionalidade)
 
+// Middleware para verificar role admin ou rh
+function onlyAdminRh(req, res, next) {
+  if (req.user && ['admin','rh'].includes(req.user.role)) return next();
+  return res.status(403).json({ error: 'Acesso restrito a admin e rh.' });
+}
+
+// 1) Listar usuários (id, nome ou login) – só admin/rh
+app.get('/api/users', auth, onlyAdminRh, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, nome AS username FROM users ORDER BY nome'
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao listar usuários.' });
+  }
+});
+
+// 2) PATCH para alterar senha de um usuário arbitrário – só admin/rh
+app.patch('/api/users/:id/password', auth, onlyAdminRh, async (req, res) => {
+  const targetId = req.params.id;
+  const { password } = req.body;
+  if (!password || password.length < 6) {
+    return res.status(400).json({ error: 'Senha deve ter ao menos 6 caracteres.' });
+  }
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    await pool.query(
+      'UPDATE users SET senha_hash = ? WHERE id = ?',
+      [hash, targetId]
+    );
+    res.sendStatus(204);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Falha ao alterar senha do usuário.' });
+  }
+});
+
 // Cadastro de denúncia (aberto)
 app.post('/api/denuncias', async (req, res) => {
   try {
@@ -433,3 +471,5 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`API rodando na porta ${PORT}`);
 });
+
+export default pool;
