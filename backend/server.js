@@ -15,7 +15,7 @@ const app = express();
 // --- Configuração CORS: CRUCIAL para comunicação entre Front-end e Back-end ---
 // Use a variável de ambiente para o URL do seu front-end no Render.
 // Durante o desenvolvimento, 'http://localhost:5173' funciona.
-app.use(cors({ origin: process.env.FRONTEND_URL || 'https://ismagro.com.br' }));
+app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
 // --- CONFIGURAÇÃO DO CLOUDINARY ---
