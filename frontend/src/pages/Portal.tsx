@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import {
@@ -14,81 +14,78 @@ import {
 
 const Portal: React.FC = () => {
   const nav = useNavigate();
-  const { logout, user } = useAuth();
+  const { logout, user: initialUser } = useAuth();
 
+  // Estados para nome e papel do usuário
+  const [userName, setUserName] = useState<string>('');
+  const [userRole, setUserRole] = useState<string>(initialUser?.role || '');
+
+  // Estilos dos botões
   const baseButton = 'flex items-center gap-2 text-white font-semibold rounded-lg transition focus:outline-none';
-  const sizes = 'py-2 px-6 text-base';
+  const sizes     = 'py-2 px-6 text-base';
   const primaryColor = 'bg-[#070735] hover:bg-opacity-90';
+
+  useEffect(() => {
+    // Busca os dados do usuário autenticado
+    fetch('/api/me', { credentials: 'include' })
+      .then(res => {
+        if (!res.ok) throw new Error('Não foi possível buscar os dados do usuário');
+        return res.json();
+      })
+      .then(data => {
+        setUserName(data.name);
+        setUserRole(data.role);
+      })
+      .catch(err => {
+        console.error(err);
+        // opcional: redirecionar para login se falhar
+        // nav('/login');
+      });
+  }, [nav]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
-      <div className="bg-white rounded-xl p-8 max-w-4xl w-full">
-        <h1 className="text-3xl font-bold mb-8 text-[#070735] text-center"> Portal do Colaborador </h1>
+      <div className="bg-white rounded-xl p-8 max-w-4xl w-full shadow-lg">
+        <h1 className="text-4xl font-extrabold mb-4 text-[#070735] text-center">
+          Portal do Colaborador
+        </h1>
         <p className="text-lg font-semibold mb-6 text-gray-800 text-center">
-          Olá, <span className="text-blue-900">{'{nome_do_usuario}'}</span>, seja bem-vindo ao seu Portal.
+          Olá, <span className="text-blue-900">{userName || 'Carregando...'}</span>, seja bem-vindo ao seu Portal.
         </p>
         <p className="text-base mb-8 text-gray-600 text-center">
           Aqui você pode acessar seus dashboards, enviar solicitações e acompanhar suas atividades.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          <button
-            onClick={() => nav('/links')}
-            className={`${baseButton} ${sizes} ${primaryColor}`}
-          >
+          <button onClick={() => nav('/links')} className={`${baseButton} ${sizes} ${primaryColor}`}>
             <BarChart2 size={20} /> Dashboards
           </button>
-
-          <button
-            onClick={() => nav('/denuncias')}
-            className={`${baseButton} ${sizes} ${primaryColor}`}
-          >
+          <button onClick={() => nav('/denuncias')} className={`${baseButton} ${sizes} ${primaryColor}`}>
             <Megaphone size={20} /> Ouvidoria
           </button>
-
-          {(user?.role === 'admin' || user?.role === 'rh' || user?.role === 'compliance') && (
-            <button
-              onClick={() => nav('/admin/denuncias')}
-              className={`${baseButton} ${sizes} ${primaryColor}`}
-            >
+          {(userRole === 'admin' || userRole === 'rh' || userRole === 'compliance') && (
+            <button onClick={() => nav('/admin/denuncias')} className={`${baseButton} ${sizes} ${primaryColor}`}>
               <ShieldCheck size={20} /> Gestão Ouvidoria
             </button>
           )}
-
-          <button
-            onClick={() => nav('/atendimento')}
-            className={`${baseButton} ${sizes} ${primaryColor}`}
-          >
+          <button onClick={() => nav('/atendimento')} className={`${baseButton} ${sizes} ${primaryColor}`}>
             <Headset size={20} /> Suporte
           </button>
-
-          {(user?.role === 'admin' || user?.role === 'rh' || user?.role === 'compliance') && (
-            <button
-              onClick={() => nav('/painel-atendimentos')}
-              className={`${baseButton} ${sizes} ${primaryColor}`}
-            >
+          {(userRole === 'admin' || userRole === 'rh' || userRole === 'compliance') && (
+            <button onClick={() => nav('/painel-atendimentos')} className={`${baseButton} ${sizes} ${primaryColor}`}>
               <Users2 size={20} /> Painel de Suporte
             </button>
           )}
-
-          {user?.role === 'admin' && (
-            <button
-              onClick={() => nav('/cadastrar')}
-              className={`${baseButton} ${sizes} ${primaryColor}`}
-            >
+          {userRole === 'admin' && (
+            <button onClick={() => nav('/cadastrar')} className={`${baseButton} ${sizes} ${primaryColor}`}>
               <UserPlus size={20} /> Cadastro de Usuário
             </button>
           )}
-
-          {user && (
-            <button
-              onClick={() => nav('/alterar-senha')}
-              className={`${baseButton} ${sizes} ${primaryColor}`}
-            >
+          {userName && (
+            <button onClick={() => nav('/alterar-senha')} className={`${baseButton} ${sizes} ${primaryColor}`}>
               <KeyRound size={20} /> Alterar Senha
             </button>
           )}
         </div>
-
         <button
           onClick={() => {
             logout();
