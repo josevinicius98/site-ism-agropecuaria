@@ -50,7 +50,7 @@ const Portal: React.FC = () => {
           Portal do Colaborador
         </h1>
         <p className="text-lg font-semibold mb-6 text-gray-800 text-center">
-          Olá, <span className="text-blue-900">{userName || 'Carregando...'}</span>, seja bem-vindo ao seu Portal.
+          Olá, seja bem-vindo ao seu Portal.
         </p>
         <p className="text-base mb-8 text-gray-600 text-center">
           Aqui você pode acessar seus dashboards, enviar solicitações e acompanhar suas atividades.

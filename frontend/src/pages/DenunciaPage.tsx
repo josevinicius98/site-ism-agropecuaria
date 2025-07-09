@@ -18,10 +18,12 @@ const DenunciaPage: React.FC = () => {
   const [status, setStatus] = useState('');
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, type, value, checked } = e.target as HTMLInputElement;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
@@ -48,11 +50,11 @@ const DenunciaPage: React.FC = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
       <div className="bg-white rounded-lg shadow-md p-10 w-full max-w-xl mt-10">
         <SectionTitle
-          title="Fale com a gente!Deixe sua sugestão, elogio ou reclamação."
-          subtitle=" Sua opinião é muito importante e será tratada com total confidencialidade e segurança."
           centered
+          title={`Fale com a gente!\nDeixe sua sugestão, elogio ou reclamação.`}
+          subtitle="Sua opinião é muito importante e será tratada com total confidencialidade e segurança. Você pode optar por permanecer anônimo."
         />
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           {/* Campo nome */}
           <div>
             <label htmlFor="nome" className="block font-medium mb-1">
@@ -65,10 +67,11 @@ const DenunciaPage: React.FC = () => {
               value={form.nome}
               onChange={handleChange}
               placeholder="Seu nome ou anonimamente"
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
               disabled={form.anonimato}
             />
           </div>
+
           {/* Categoria */}
           <div>
             <label htmlFor="categoria" className="block font-medium mb-1">
@@ -80,7 +83,7 @@ const DenunciaPage: React.FC = () => {
               value={form.categoria}
               onChange={handleChange}
               required
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="">Selecione uma categoria</option>
               <option value="Sugestão">Sugestão</option>
@@ -92,6 +95,7 @@ const DenunciaPage: React.FC = () => {
               <option value="Outro">Outro</option>
             </select>
           </div>
+
           {/* Descrição */}
           <div>
             <label htmlFor="descricao" className="block font-medium mb-1">
@@ -104,9 +108,10 @@ const DenunciaPage: React.FC = () => {
               value={form.descricao}
               onChange={handleChange}
               required
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
+
           {/* Anonimato */}
           <div className="flex items-center mb-2">
             <input
@@ -117,16 +122,24 @@ const DenunciaPage: React.FC = () => {
               onChange={handleChange}
               className="mr-2"
             />
-            <label htmlFor="anonimato">Desejo permanecer anônimo</label>
+            <label htmlFor="anonimato" className="text-gray-700">
+              Desejo permanecer anônimo
+            </label>
           </div>
+
           <button
             type="submit"
-            className="bg-blue-900 hover:bg-blue-700 text-white font-bold w-full py-2 rounded transition"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded transition focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             Enviar Formulário
           </button>
+
           {status && (
-            <p className={`mt-2 text-center font-semibold ${status.startsWith('Falha') ? 'text-red-600' : 'text-green-700'}`}>
+            <p
+              className={`mt-2 text-center font-semibold ${
+                status.startsWith('Falha') ? 'text-red-600' : 'text-green-700'
+              }`}
+            >
               {status}
             </p>
           )}
