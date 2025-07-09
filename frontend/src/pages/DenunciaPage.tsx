@@ -48,8 +48,8 @@ const DenunciaPage: React.FC = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
       <div className="bg-white rounded-lg shadow-md p-10 w-full max-w-xl mt-10">
         <SectionTitle
-          title="Canal de Denúncia"
-          subtitle="Registre sua denúncia de forma segura"
+          title="Fale com a gente!Deixe sua sugestão, elogio ou reclamação."
+          subtitle=" Sua opinião é muito importante e será tratada com total confidencialidade e segurança."
           centered
         />
         <form onSubmit={handleSubmit} className="space-y-6">
