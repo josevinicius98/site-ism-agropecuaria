@@ -15,7 +15,7 @@ const app = express();
 // --- Configuração CORS: CRUCIAL para comunicação entre Front-end e Back-end ---
 // Use a variável de ambiente para o URL do seu front-end no Render.
 // Durante o desenvolvimento, 'http://localhost:5173' funciona.
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
+app.use(cors({ origin: process.env.FRONTEND_URL || 'https://ismagro.com.br' }));
 app.use(express.json());
 
 // --- CONFIGURAÇÃO DO CLOUDINARY ---
@@ -32,16 +32,18 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // Configuração do MySQL
 const pool = mysql.createPool({
-  host: 'localhost',        // string!
-  port: 3306,
-  user: 'root',             // string!
-  password: '06081998',     // string!
-  database: 'portal_db',    // string!
+  host: process.env.MYSQLHOST,
+  port: process.env.MYSQLPORT,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
   connectTimeout: 10000
 })
+// Verifica se a conexão com o banco de dados foi bem-sucedida
+pool.getConnection()
 
 const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta-para-dev';
 
