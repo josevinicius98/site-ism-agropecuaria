@@ -47,7 +47,7 @@ const Links: React.FC = () => {
     <div className="container-custom py-20 text-center">
       {/* Logo da ISM centralizada acima do título */}
       <img
-        src="../assets/logosemf.png"  // Caminho para a logo da ISM
+        src="/assets/logosemf.png"  // Caminho para a logo da ISM
         alt="Logo ISM Agropecuária"
         className="mx-auto mb-6 h-20"  // Centraliza e define altura da imagem
       />
