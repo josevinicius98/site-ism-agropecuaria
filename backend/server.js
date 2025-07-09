@@ -158,6 +158,22 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// ROTA: Retorna nome e role do usuário logado
+app.get('/api/me', auth, async (req, res) => {
+  try {
+    // req.userId e req.user estão disponíveis graças ao middleware `auth`
+    const [rows] = await pool.query(
+      'SELECT nome AS name, role FROM users WHERE id = ?',
+      [req.userId]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Usuário não encontrado' });
+    return res.json(rows[0]);
+  } catch (err) {
+    console.error('Erro em /api/me:', err);
+    return res.status(500).json({ error: 'Erro ao buscar dados do usuário' });
+  }
+});
+
 // ROTA: Alterar senha (Atualizada para marcar 'primeiro_login' como FALSE)
 app.post('/api/alterar-senha', auth, async (req, res) => {
   try {
