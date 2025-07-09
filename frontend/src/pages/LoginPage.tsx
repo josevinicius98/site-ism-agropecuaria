@@ -44,7 +44,8 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
-      <h2 className="text-2xl font-bold mb-4">Login</h2> <h3 className="text-lg mb-6">Caro, colaborador, acesse sua conta</h3>
+      <h2 className="text-2xl font-bold mb-4">Bem-vindo ao ISM Agropecuária!</h2> 
+      <h3 className="text-lg mb-6">Por favor, insira seu usuário e senha para continuar.</h3>
       {error && <div className="mb-4 text-red-500">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
