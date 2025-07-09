@@ -16,76 +16,87 @@ const Portal: React.FC = () => {
   const nav = useNavigate();
   const { logout, user } = useAuth();
 
+  const baseButton = 'flex items-center gap-2 text-white font-semibold rounded-lg transition focus:outline-none';
+  const sizes = 'py-2 px-6 text-base';
+  const primaryColor = 'bg-[#070735] hover:bg-opacity-90';
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 pb-10">
-      <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-4xl w-full flex flex-col items-center mt-14">
-        <h1 className="text-5xl font-bold mb-10 text-blue-1000 text-center drop-shadow-sm">
-          Portal do Colaborador
-        </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 w-full">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
+      <div className="bg-white rounded-xl p-8 max-w-4xl w-full">
+        <h1 className="text-3xl font-bold mb-8 text-[#070735] text-center"> Portal do Colaborador </h1>
+        <p className="text-lg font-semibold mb-6 text-gray-800 text-center">
+          Olá, <span className="text-blue-900">{'{nome_do_usuario}'}</span>, seja bem-vindo ao seu Portal.
+        </p>
+        <p className="text-base mb-8 text-gray-600 text-center">
+          Aqui você pode acessar seus dashboards, enviar solicitações e acompanhar suas atividades.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <button
             onClick={() => nav('/links')}
-            className="flex items-center gap-2 bg-[#070735] hover:bg-blue-900 text-white py-5 px-8 rounded-2xl text-xl font-semibold shadow transition-all justify-center"
+            className={`${baseButton} ${sizes} ${primaryColor}`}
           >
-            <BarChart2 size={28} /> Dashboards
+            <BarChart2 size={20} /> Dashboards
           </button>
+
           <button
             onClick={() => nav('/denuncias')}
-            className="flex items-center gap-2 bg-[#070735] hover:bg-blue-900 text-white py-5 px-8 rounded-2xl text-xl font-semibold shadow transition-all justify-center"
+            className={`${baseButton} ${sizes} ${primaryColor}`}
           >
-            <Megaphone size={28} /> Ouvidoria
+            <Megaphone size={20} /> Ouvidoria
           </button>
+
           {(user?.role === 'admin' || user?.role === 'rh' || user?.role === 'compliance') && (
             <button
               onClick={() => nav('/admin/denuncias')}
-              className="flex items-center gap-2 bg-[#070735]
-              s hover:bg-[#070735] text-white py-5 px-8 rounded-2xl text-xl font-semibold shadow transition-all justify-center"
+              className={`${baseButton} ${sizes} ${primaryColor}`}
             >
-              <ShieldCheck size={28} /> Gestão Ouvidoria
+              <ShieldCheck size={20} /> Gestão Ouvidoria
             </button>
           )}
-          
-          {/* Botão de Suporte visível para todos */}
+
           <button
             onClick={() => nav('/atendimento')}
-            className="flex items-center gap-2 bg-[#070735] hover:bg-blue-900 text-white py-5 px-8 rounded-2xl text-xl font-semibold shadow transition-all justify-center"
+            className={`${baseButton} ${sizes} ${primaryColor}`}
           >
-            <Headset size={28} /> Suporte
+            <Headset size={20} /> Suporte
           </button>
-          {/* Painel do Suporte/Admin/RH */}
+
           {(user?.role === 'admin' || user?.role === 'rh' || user?.role === 'compliance') && (
             <button
               onClick={() => nav('/painel-atendimentos')}
-              className="flex items-center gap-2 bg-[#070735] hover:bg-[#070735] text-white py-5 px-8 rounded-2xl text-xl font-semibold shadow transition-all justify-center"
+              className={`${baseButton} ${sizes} ${primaryColor}`}
             >
-              <Users2 size={28} /> Painel de Suporte
+              <Users2 size={20} /> Painel de Suporte
             </button>
           )}
+
           {user?.role === 'admin' && (
             <button
               onClick={() => nav('/cadastrar')}
-              className="flex items-center gap-2 bg-green-800 hover:bg-green-800 text-white py-5 px-8 rounded-2xl text-xl font-semibold shadow transition-all justify-center"
+              className={`${baseButton} ${sizes} ${primaryColor}`}
             >
-              <UserPlus size={28} /> Cadastro de Usuário
+              <UserPlus size={20} /> Cadastro de Usuário
             </button>
           )}
+
           {user && (
             <button
               onClick={() => nav('/alterar-senha')}
-              className="flex items-center gap-2 bg-yellow-800 hover:bg-yellow-800 text-white py-5 px-8 rounded-2xl text-xl font-semibold shadow transition-all justify-center"
+              className={`${baseButton} ${sizes} ${primaryColor}`}
             >
-              <KeyRound size={28} /> Alterar Senha
+              <KeyRound size={20} /> Alterar Senha
             </button>
           )}
         </div>
+
         <button
           onClick={() => {
             logout();
             nav('/login');
           }}
-          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-10 py-3 text-xl rounded-2xl font-semibold shadow transition-all mt-2 justify-center"
+          className={`${baseButton} ${sizes} ${primaryColor}`}
         >
-          <LogOut size={24} /> Sair
+          <LogOut size={18} /> Sair
         </button>
       </div>
     </div>
