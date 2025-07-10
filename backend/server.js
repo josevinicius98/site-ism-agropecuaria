@@ -21,6 +21,13 @@ app.use(express.json());
 const upload = multer({ storage: multer.memoryStorage() });
 // -----------------------------------
 
+// --- CONFIGURAÇÃO DO CLOUDINARY ---
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 console.log(
   'DEBUG MySQL ENV:',
   process.env.MYSQLHOST,
