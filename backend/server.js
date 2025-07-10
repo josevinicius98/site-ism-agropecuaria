@@ -25,13 +25,15 @@ console.log(
   'DEBUG MySQL ENV:',
   process.env.MYSQLHOST,
   process.env.MYSQLUSER,
-  process.env.MYSQLDATABASE
+  process.env.MYSQLDATABASE,
+  process.env.MYSQLPASSWORD ? 'senha OK' : 'SEM senha'
 );
+
 
 // Configuração do MySQL
 const pool = mysql.createPool({
   host: process.env.MYSQLHOST,
-  port: process.env.MYSQLPORT,
+  port: Number(process.env.MYSQLPORT), // garanta que é número!
   user: process.env.MYSQLUSER,
   password: process.env.MYSQLPASSWORD,
   database: process.env.MYSQLDATABASE,
@@ -39,7 +41,8 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   connectTimeout: 10000
-})
+});
+
 // Verifica se a conexão com o banco de dados foi bem-sucedida
 pool.getConnection()
 
