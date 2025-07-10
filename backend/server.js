@@ -18,13 +18,6 @@ const app = express();
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
-// --- CONFIGURAÇÃO DO CLOUDINARY ---
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
 // Configuração do Multer para armazenar em memória (antes de enviar para Cloudinary)
 // Isso é necessário porque o Cloudinary vai precisar do buffer do arquivo.
 const upload = multer({ storage: multer.memoryStorage() });
@@ -230,7 +223,7 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
 });
 
 
-// JOB AGENDADO: Inativar usuários que não alteraram a senha em 3 dias
+// JOB AGENDADO: Inativar usuários que não alteraram a senha em 5 dias
 // Este job rodará todo dia à meia-noite (00:00)
 cron.schedule('0 0 * * *', async () => {
   console.log('Executando job de inativação de usuários...');
