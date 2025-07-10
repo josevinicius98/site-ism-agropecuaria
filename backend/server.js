@@ -6,9 +6,7 @@ import mysql from 'mysql2/promise';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
-// import path from 'path'; // Não precisará mais, pois o Multer não salvará localmente
 import cron from 'node-cron';
-import { v2 as cloudinary } from 'cloudinary'; // Importar Cloudinary para uploads
 
 const app = express();
 
@@ -22,6 +20,13 @@ app.use(express.json());
 // Isso é necessário porque o Cloudinary vai precisar do buffer do arquivo.
 const upload = multer({ storage: multer.memoryStorage() });
 // -----------------------------------
+
+console.log(
+  'DEBUG MySQL ENV:',
+  process.env.MYSQLHOST,
+  process.env.MYSQLUSER,
+  process.env.MYSQLDATABASE
+);
 
 // Configuração do MySQL
 const pool = mysql.createPool({
