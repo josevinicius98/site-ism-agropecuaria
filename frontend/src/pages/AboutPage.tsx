@@ -74,7 +74,7 @@ const AboutPage: React.FC = () => {
               </div>
               <div className="rounded-lg overflow-hidden shadow-md h-48">
                 <img
-                  src="/assets/boi_preto.png"
+                  src="/assets/boi_preto.jpg"
                   alt="Logomarca ISM"
                   className="w-full h-full object-cover"
                 />
