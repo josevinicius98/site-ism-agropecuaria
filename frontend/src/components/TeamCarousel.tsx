@@ -5,19 +5,19 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import ActivityCard from './ActivityCard'; // seu card existente
 
-// Dados iniciais (6 fotos) {/*caso queria escrever um título na foto escrever dento do ''*/},
+// Dados iniciais (10 fotos) {/*caso queria escrever um título na foto escrever dento do ''*/},
 const photos = [
-  { id: 1, src: '../assets/gl1.jpeg', name: '' }, 
-  { id: 2, src: '../assets/gl2.jpeg', name: '' },
-  { id: 3, src: '../assets/gl4.jpeg', name: '' }, 
-  { id: 4, src: '../assets/gl5.jpeg', name: '' }, 
-  { id: 5, src: '../assets/gl6.jpeg', name: '' }, 
-  { id: 6, src: '../assets/gl8.jpeg', name: '' }, 
-  { id: 7, src: '../assets/gl9.jpeg', name: '' }, 
-  { id: 8, src: '../assets/gl10.jpeg', name: '' }, 
-  { id: 9, src: '../assets/gl11.jpeg', name: '' }, 
-  { id: 10, src: '../assets/gl12.jpeg', name: '' }, 
-  { id: 11, src: '../assets/gl13.jpeg', name: '' }, 
+  { id: 1, src: '../assets/gado_comendo.jpeg', name: '' }, 
+  { id: 2, src: '../assets/gustavo_agricultura.jpeg', name: '' },
+  { id: 3, src: '../assets/pulverizador.jpeg', name: '' }, 
+  { id: 4, src: '../assets/trator_verde1.jpeg', name: '' }, 
+  { id: 5, src: '../assets/homem_seringa.jpeg', name: '' }, 
+  { id: 6, src: '../assets/tratores.jpeg', name: '' }, 
+  { id: 7, src: '../assets/homem_curral.jpeg', name: '' }, 
+  { id: 8, src: '../assets/gado_preto.jpeg', name: '' }, 
+  { id: 9, src: '../assets/trator_verde2.jpeg', name: '' }, 
+  //{ id: 10, src: 'caminho da imagem', name: 'legenda' }, */
+
 ];
 
 
@@ -27,9 +27,9 @@ const TeamCarousel: React.FC = () => {
     infinite: true,           // loop infinito
     speed: 10,               // velocidade da transição
     slidesToShow: 5,          // quantos cards aparecem ao mesmo tempo
-    slidesToScroll: 1,        // quantos pula a cada scroll
+    slidesToScroll: 2,        // quantos pula a cada scroll
     autoplay: true,           // autoplay ligado
-    autoplaySpeed: 3000,      // 3s entre trocas
+    autoplaySpeed: 2000,      // 3s entre trocas
     responsive: [             // responsividade
       { breakpoint: 1024, settings: { slidesToShow: 3 } },
       { breakpoint: 768, settings:  { slidesToShow: 2 } },

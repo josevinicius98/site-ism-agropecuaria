@@ -52,6 +52,7 @@ const DenunciaPage: React.FC = () => {
         <SectionTitle
           centered
           title="Fale com a gente!"
+          
           subtitle="Sua opinião é muito importante e será tratada com total confidencialidade e segurança. Você pode optar por permanecer anônimo."
         />
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">

@@ -31,9 +31,19 @@ const AboutPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>
               <p className="text-gray-700 mb-4">
-                A Família Silva Machado tem raízes centenárias em Frutal-MG. Há mais de 40
-                anos, nossos fundadores consolidaram uma trajetória de valores, ética e inovação no
-                agronegócio brasileiro.
+                A ISM Agropecuária conduz suas relações com todas os seus stakeholders, 
+                afim de manter seus valores e assegurar comportamentos éticos no ambiente rural e empresarial, 
+                de forma a disseminar sua cultura aos colaboradores, visando desenvolvimento, progresso e qualidade de vida.
+                ISM= Irmãos Silva Machado e representa uma empresa familiar, cujo legado vem sendo propagado 
+                há mais de 40 anos e que hoje, é gerida por Rafael, Otávio e Aldiberto Jr. A Família Silva Machado 
+                foi constituída há quatro décadas a partir da união de Gonia Maria  e Aldiberto Dia.
+                A ISM atua no ramo da Agricultura e da Pecuária, na região do Triângulo Mineiro. 
+                Na agricultura com soja, sorgo, milho, milheto e cana-de-açúcar e no ramo da Pecuária, envolve os processos de recria e 
+                engorda, contribuindo com o desenvolvimento da economia na região.
+                A área de atuação da empresa, concentrada na Região do Triângulo Mineiro e Alto Paranaíba, 
+                nos municípios de Frutal, União de Minas, Limeira do Oeste, Itapagipe e entre outros; 
+                lembrando que a ISM atua no ramo da pecuária e agricultura! 
+                ISM – Agropecuária: há mais de 40 anos trazendo a força do campo 🌱
               </p>
               <p className="text-gray-700 mb-4">
                 Hoje, a ISM Agropecuária segue esse legado, trazendo tecnologia e sustentabilidade
@@ -64,7 +74,7 @@ const AboutPage: React.FC = () => {
               </div>
               <div className="rounded-lg overflow-hidden shadow-md h-48">
                 <img
-                  src="/assets/logosemf.png"
+                  src="/assets/boi_preto.png"
                   alt="Logomarca ISM"
                   className="w-full h-full object-cover"
                 />
@@ -118,7 +128,7 @@ const AboutPage: React.FC = () => {
         <div className="container-custom max-w-6xl mx-auto px-4">
           <SectionTitle
             title="Galeria"
-            subtitle="Nossa equipe em ação"
+            subtitle="Descubra em imagens a essência da ISM Agropecuária: inovação, sustentabilidade e dedicação no campo"
             centered
           />
           <TeamCarousel />
