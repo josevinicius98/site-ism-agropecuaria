@@ -175,14 +175,13 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// ROTA: Alterar senha (Atualizada para marcar 'primeiro_login' como FALSE)
+// ROTA: Alterar senha (permite primeiro login e revalida token)
 app.post('/api/alterar-senha', auth, async (req, res) => {
   try {
     const { senhaAtual, novaSenha } = req.body;
-    // req.user foi adicionado pelo middleware auth
-    const userId = req.userId; // Ou req.user.sub
+    const userId = req.user.sub; // Padrão do JWT!
 
-    if (!novaSenha) { // senhaAtual pode ser opcional no primeiro login
+    if (!novaSenha) {
       return res.status(400).json({ error: 'A nova senha é obrigatória.' });
     }
 
@@ -197,29 +196,25 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
 
     const userInDb = rows[0];
 
-    // Se não for o primeiro login, a senha atual é obrigatória
+    // Se NÃO for primeiro login, senhaAtual é obrigatória e precisa conferir!
     if (!userInDb.primeiro_login) {
       if (!senhaAtual) {
-          return res.status(400).json({ error: 'A senha atual é obrigatória para alterar a senha.' });
+        return res.status(400).json({ error: 'A senha atual é obrigatória para alterar a senha.' });
       }
       const match = await bcrypt.compare(senhaAtual, userInDb.senha_hash);
       if (!match) {
         return res.status(401).json({ error: 'Senha atual incorreta.' });
       }
     }
-    // Para o primeiro login, se você tem uma senha padrão e não a exige aqui,
-    // o 'if (!userInDb.primeiro_login)' acima já trata isso.
 
+    // Se for primeiro login, só troca a senha!
     const novaHash = await bcrypt.hash(novaSenha, 10);
-
-    // Atualiza a senha e define 'primeiro_login' para FALSE
     await pool.query(
       'UPDATE users SET senha_hash = ?, primeiro_login = FALSE, status_usuario = "ativo" WHERE id = ?',
       [novaHash, userId]
     );
 
-    // Opcional: Re-gerar o token para o frontend já ter o 'primeiro_login: false' atualizado
-    // Isso evita que o frontend precise fazer um novo login para atualizar o estado
+    // Gera novo token atualizado para o usuário
     const [updatedUserRows] = await pool.query(
       'SELECT id, nome, login, role, primeiro_login, status_usuario FROM users WHERE id = ?',
       [userId]
@@ -234,10 +229,9 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
         primeiro_login: updatedUser.primeiro_login, // Agora será FALSE
         status_usuario: updatedUser.status_usuario
       },
-      JWT_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
-
 
     res.json({ message: 'Senha alterada com sucesso.', token: newToken, user: updatedUser });
   } catch (err) {
@@ -245,6 +239,7 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
     res.status(500).json({ error: 'Erro ao alterar senha.' });
   }
 });
+
 
 
 // JOB AGENDADO: Inativar usuários que não alteraram a senha em 5 dias
@@ -295,44 +290,25 @@ app.get('/api/users', auth, onlyAdminRh, async (req, res) => {
   }
 });
 
-app.post('/api/alterar-senha', auth, allowAdminRhOrFirstLogin, async (req, res) => {
+// 2) PATCH para alterar senha de um usuário arbitrário – só admin/rh
+app.patch('/api/users/:id/password', auth, onlyAdminRh, async (req, res) => {
+  const targetId = req.params.id;
+  const { password } = req.body;
+  if (!password || password.length < 6) {
+    return res.status(400).json({ error: 'Senha deve ter ao menos 6 caracteres.' });
+  }
   try {
-    const { senha_atual, nova_senha, usuario_id } = req.body;
-
-    // Se for admin/rh, pode passar usuario_id para trocar senha de outro usuário
-    // Se for usuário comum, só pode trocar a própria senha (do req.user.sub)
-    let targetUserId = usuario_id;
-    if (!['admin', 'rh'].includes(req.user.role)) {
-      targetUserId = req.user.sub;
-    }
-
-    // Busca o usuário alvo
-    const [users] = await pool.query('SELECT * FROM users WHERE id = ?', [targetUserId]);
-    if (users.length === 0) {
-      return res.status(404).json({ error: 'Usuário não encontrado.' });
-    }
-    const user = users[0];
-
-    // Se não for admin/rh, exige senha atual para trocar
-    if (!['admin', 'rh'].includes(req.user.role)) {
-      if (!senha_atual || senha_atual.length === 0) {
-        return res.status(400).json({ error: 'Senha atual obrigatória.' });
-      }
-      // Verifique a senha atual (use seu método de comparação)
-      if (senha_atual !== user.senha) {
-        return res.status(401).json({ error: 'Senha atual incorreta.' });
-      }
-    }
-
-    // Troca a senha
-    await pool.query('UPDATE users SET senha = ?, primeiro_login = 0 WHERE id = ?', [nova_senha, targetUserId]);
-    res.json({ success: true, message: 'Senha alterada com sucesso.' });
-  } catch (error) {
-    console.error('Erro ao alterar senha:', error);
-    res.status(500).json({ error: 'Erro ao alterar senha.' });
+    const hash = await bcrypt.hash(password, 10);
+    await pool.query(
+      'UPDATE users SET senha_hash = ? WHERE id = ?',
+      [hash, targetId]
+    );
+    res.sendStatus(204);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Falha ao alterar senha do usuário.' });
   }
 });
-
 
 // Cadastro de denúncia (aberto)
 app.post('/api/denuncias', async (req, res) => {
