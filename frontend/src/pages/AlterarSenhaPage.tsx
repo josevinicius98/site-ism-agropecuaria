@@ -34,36 +34,50 @@ const AlterarSenhaPage: React.FC = () => {
   }, [user.role, token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage(null);
-    if (newPassword !== confirmPassword) {
-      setMessage('As senhas não coincidem.');
-      return;
-    }
+  e.preventDefault();
+  setMessage(null);
 
-    try {
-      if ((user.role === 'admin' || user.role === 'rh') && targetUserId) {
-        await axios.patch(
-          `/api/users/${targetUserId}/password`,
-          { password: newPassword },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setMessage('Senha do usuário atualizada com sucesso.');
-      } else {
-        await axios.patch(
-          '/api/users/me/password',
-          { currentPassword, newPassword },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setMessage('Sua senha foi alterada com sucesso.');
-        setCurrentPassword('');
-      }
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (error: any) {
-      setMessage(error.response?.data?.error || 'Erro ao alterar senha.');
+  if (newPassword !== confirmPassword) {
+    setMessage('As senhas não coincidem.');
+    return;
+  }
+
+  try {
+    if ((user.role === 'admin' || user.role === 'rh') && targetUserId) {
+      // Admin/RH trocando senha de outro usuário
+      await axios.patch(
+        `/api/users/${targetUserId}/password`,
+        { password: newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setMessage('Senha do usuário atualizada com sucesso.');
+    } else if (user.primeiro_login) {
+      // PRIMEIRO LOGIN: POST em /api/alterar-senha (não exige senha atual)
+      await axios.post(
+        '/api/alterar-senha',
+        { novaSenha: newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setMessage('Senha alterada com sucesso! Faça login novamente.');
+      setCurrentPassword('');
+    } else {
+      // Usuário comum trocando a própria senha (exige senha atual)
+      await axios.post(
+        '/api/alterar-senha',
+        { senhaAtual: currentPassword, novaSenha: newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setMessage('Senha alterada com sucesso.');
+      setCurrentPassword('');
     }
-  };
+    setNewPassword('');
+    setConfirmPassword('');
+  } catch (error: any) {
+    setMessage(error.response?.data?.error || 'Erro ao alterar senha.');
+  }
+};
+  // Renderiza o formulário de alteração de senha
+  if (!user) return <div className="text-center py-8">Carregando...</div>;
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded shadow">
@@ -84,7 +98,7 @@ const AlterarSenhaPage: React.FC = () => {
         </div>
       )}
 
-      {!(user.role === 'admin' || user.role === 'rh') && (
+      {!(user.role === 'admin' || user.role === 'rh' || user.primeiro_login) && (
         <div className="mb-4">
           <label className="block mb-1 font-medium">Senha Atual:</label>
           <input
@@ -93,9 +107,10 @@ const AlterarSenhaPage: React.FC = () => {
             value={currentPassword}
             onChange={e => setCurrentPassword(e.target.value)}
             required
-          />
+         />
         </div>
       )}
+
 
       <div className="mb-4">
         <label className="block mb-1 font-medium">Nova Senha:</label>
