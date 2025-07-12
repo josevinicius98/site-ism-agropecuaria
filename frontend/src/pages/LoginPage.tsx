@@ -6,14 +6,14 @@ const LoginPage: React.FC = () => {
   const [loginInput, setLoginInput] = useState('');
   const [senha, setSenha] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // Estado para controlar o carregamento do botão
-  const { login: doLogin } = useAuth(); // Renomeado para evitar conflito com a variável de estado 'loginInput'
+  const [loading, setLoading] = useState(false);
+  const { login: doLogin } = useAuth();
   const nav = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true); // Inicia o estado de carregamento
+    setLoading(true);
     try {
       const res = await fetch('/api/login', {
         method: 'POST',
@@ -27,24 +27,23 @@ const LoginPage: React.FC = () => {
       }
 
       const data = await res.json();
-      // Corrigido: Agora passa o token E o objeto 'user' completo retornado pelo backend para o 'doLogin'
-      doLogin(data.token, data.user); // data.user agora contém a propriedade `primeiro_login`
+      doLogin(data.token, data.user);
 
-      if (data.user.primeiro_login) { // Verifica a propriedade `primeiro_login`
-        nav('/alterar-senha'); // Redireciona para a página de alteração de senha
+      if (data.user.primeiro_login) {
+        nav('/alterar-senha');
       } else {
-        nav('/portal'); // Redireciona para o portal ou home após login normal
+        nav('/portal');
       }
     } catch (err: any) {
       setError(err.message);
     } finally {
-      setLoading(false); // Finaliza o estado de carregamento
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
-      <h2 className="text-2xl font-bold mb-4">Bem-vindo!</h2> 
+      <h2 className="text-2xl font-bold mb-4">Bem-vindo!</h2>
       <h3 className="text-2xl font-bold mb-6">Por favor, insira seu usuário e senha para continuar.</h3>
       {error && <div className="mb-4 text-red-500">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
