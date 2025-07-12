@@ -7,27 +7,25 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
 import cron from 'node-cron';
+import cloudinary from 'cloudinary';
 
 const app = express();
 
-// --- Configuração CORS: CRUCIAL para comunicação entre Front-end e Back-end ---
-// Use a variável de ambiente para o URL do seu front-end no Render.
-// Durante o desenvolvimento, 'http://localhost:5173' funciona.
+// --- Configuração CORS ---
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
-// Configuração do Multer para armazenar em memória (antes de enviar para Cloudinary)
-// Isso é necessário porque o Cloudinary vai precisar do buffer do arquivo.
+// Multer para uploads
 const upload = multer({ storage: multer.memoryStorage() });
-// -----------------------------------
 
-// --- CONFIGURAÇÃO DO CLOUDINARY ---
-cloudinary.config({
+// --- Cloudinary ---
+cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Debug MySQL
 console.log(
   'DEBUG MySQL ENV:',
   process.env.MYSQLHOST,
@@ -36,11 +34,10 @@ console.log(
   process.env.MYSQLPASSWORD ? 'senha OK' : 'SEM senha'
 );
 
-
-// Configuração do MySQL
+// Pool MySQL
 const pool = mysql.createPool({
   host: process.env.MYSQLHOST,
-  port: Number(process.env.MYSQLPORT), // garanta que é número!
+  port: Number(process.env.MYSQLPORT),
   user: process.env.MYSQLUSER,
   password: process.env.MYSQLPASSWORD,
   database: process.env.MYSQLDATABASE,
@@ -50,43 +47,33 @@ const pool = mysql.createPool({
   connectTimeout: 10000
 });
 
-// Verifica se a conexão com o banco de dados foi bem-sucedida
-pool.getConnection()
-
 const JWT_SECRET = process.env.JWT_SECRET || 'chave-secreta-para-dev';
 
-// Middleware de autenticação
+// --- Middlewares ---
 function auth(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: 'Token não fornecido' });
-
   const token = authHeader.split(' ')[1];
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ error: 'Token inválido' });
     req.userId = decoded.sub;
     req.role = decoded.role;
-    // Adicionar 'primeiro_login' e 'status_usuario' ao req.user para facilitar acesso nos middlewares subsequentes
-    req.user = decoded; // Adicionar o objeto decodificado completo
+    req.user = decoded;
     next();
   });
 }
 
-// Middleware para RH/Admin/Compliance
 function onlyRHorCompliance(req, res, next) {
   if (req.user && ['admin', 'rh', 'compliance'].includes(req.user.role)) return next();
   return res.status(403).json({ error: 'Acesso restrito.' });
 }
 
-// Middleware: permite admin/rh OU qualquer usuário no primeiro login
-function allowAdminRhOrFirstLogin(req, res, next) {
-  if (['admin', 'rh'].includes(req.user.role) || req.user.primeiro_login) {
-    return next();
-  }
-  return res.status(403).json({ error: 'Acesso restrito a admin/rh ou ao primeiro login.' });
+function onlyAdminRh(req, res, next) {
+  if (req.user && ['admin','rh'].includes(req.user.role)) return next();
+  return res.status(403).json({ error: 'Acesso restrito a admin e rh.' });
 }
 
-
-// ROTA: Cadastro de usuário seguro (Mantém primeiro_login como TRUE por padrão do DB)
+// --- Cadastro de usuário ---
 app.post('/api/cadastrar', async (req, res) => {
   try {
     const { nome, login, senha, role } = req.body;
@@ -94,7 +81,6 @@ app.post('/api/cadastrar', async (req, res) => {
       return res.status(400).json({ error: 'Nome, login e senha são obrigatórios' });
     }
     const hash = await bcrypt.hash(senha, 10);
-    // As colunas primeiro_login, data_primeiro_login, status_usuario terão seus defaults do DB
     await pool.query(
       'INSERT INTO users (nome, login, senha_hash, role) VALUES (?, ?, ?, ?)',
       [nome, login, hash, role || 'colaborador']
@@ -109,7 +95,7 @@ app.post('/api/cadastrar', async (req, res) => {
   }
 });
 
-// ROTA: Login seguro (Atualizado com lógica de primeiro_login e status_usuario)
+// --- Login ---
 app.post('/api/login', async (req, res) => {
   try {
     const { login, senha } = req.body;
@@ -124,7 +110,6 @@ app.post('/api/login', async (req, res) => {
 
     const user = rows[0];
 
-    // Verificar status do usuário
     if (user.status_usuario === 'inativo') {
       return res.status(403).json({ error: 'Usuário inativo. Por favor, entre em contato com o suporte.' });
     }
@@ -135,13 +120,8 @@ app.post('/api/login', async (req, res) => {
     }
 
     let isFirstLogin = user.primeiro_login;
-    // Se for o primeiro login e data_primeiro_login ainda não estiver definida, defina-a
     if (isFirstLogin && user.data_primeiro_login === null) {
-      await pool.query(
-        'UPDATE users SET data_primeiro_login = NOW() WHERE id = ?',
-        [user.id]
-      );
-      // Atualizar o objeto user para refletir a mudança no banco de dados para o token
+      await pool.query('UPDATE users SET data_primeiro_login = NOW() WHERE id = ?', [user.id]);
       user.data_primeiro_login = new Date();
     }
 
@@ -151,14 +131,13 @@ app.post('/api/login', async (req, res) => {
         nome: user.nome,
         login: user.login,
         role: user.role,
-        primeiro_login: isFirstLogin, // Incluir no token para o frontend verificar
+        primeiro_login: isFirstLogin,
         status_usuario: user.status_usuario
       },
       JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    // Retorna o token e os dados do usuário para o frontend, incluindo o status de primeiro_login
     return res.json({
       token,
       user: {
@@ -166,7 +145,7 @@ app.post('/api/login', async (req, res) => {
         nome: user.nome,
         login: user.login,
         role: user.role,
-        primeiro_login: isFirstLogin // Enviar o status para o frontend
+        primeiro_login: isFirstLogin
       }
     });
   } catch (err) {
@@ -175,11 +154,11 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// ROTA: Alterar senha (permite primeiro login e revalida token)
+// --- Alterar senha (primeiro login ou normal) ---
 app.post('/api/alterar-senha', auth, async (req, res) => {
   try {
     const { senhaAtual, novaSenha } = req.body;
-    const userId = req.user.sub; // Padrão do JWT!
+    const userId = req.user.sub;
 
     if (!novaSenha) {
       return res.status(400).json({ error: 'A nova senha é obrigatória.' });
@@ -196,7 +175,7 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
 
     const userInDb = rows[0];
 
-    // Se NÃO for primeiro login, senhaAtual é obrigatória e precisa conferir!
+    // Se NÃO for primeiro login, senhaAtual é obrigatória!
     if (!userInDb.primeiro_login) {
       if (!senhaAtual) {
         return res.status(400).json({ error: 'A senha atual é obrigatória para alterar a senha.' });
@@ -207,14 +186,14 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
       }
     }
 
-    // Se for primeiro login, só troca a senha!
+    // Atualiza senha e marca como não-primeiro-login
     const novaHash = await bcrypt.hash(novaSenha, 10);
     await pool.query(
       'UPDATE users SET senha_hash = ?, primeiro_login = FALSE, status_usuario = "ativo" WHERE id = ?',
       [novaHash, userId]
     );
 
-    // Gera novo token atualizado para o usuário
+    // Gera novo token atualizado
     const [updatedUserRows] = await pool.query(
       'SELECT id, nome, login, role, primeiro_login, status_usuario FROM users WHERE id = ?',
       [userId]
@@ -226,10 +205,10 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
         nome: updatedUser.nome,
         login: updatedUser.login,
         role: updatedUser.role,
-        primeiro_login: updatedUser.primeiro_login, // Agora será FALSE
+        primeiro_login: updatedUser.primeiro_login,
         status_usuario: updatedUser.status_usuario
       },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: '1h' }
     );
 
@@ -240,17 +219,13 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
   }
 });
 
-
-
-// JOB AGENDADO: Inativar usuários que não alteraram a senha em 5 dias
-// Este job rodará todo dia à meia-noite (00:00)
+// --- JOB: Inativar usuários que não trocaram a senha em 5 dias ---
 cron.schedule('0 0 * * *', async () => {
   console.log('Executando job de inativação de usuários...');
   try {
     const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 5); // 5 dias atrás       
-    const formattedDate = threeDaysAgo.toISOString().slice(0, 19).replace('T', ' '); // Formato MySQL DATETIME
-
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 5);
+    const formattedDate = threeDaysAgo.toISOString().slice(0, 19).replace('T', ' ');
     const [result] = await pool.query(
       `UPDATE users
        SET status_usuario = 'inativo'
@@ -266,18 +241,10 @@ cron.schedule('0 0 * * *', async () => {
   }
 }, {
   scheduled: true,
-  timezone: "America/Sao_Paulo" // Defina o fuso horário para Frutal/MG
+  timezone: "America/Sao_Paulo"
 });
 
-// Outras Rotas (sem alterações significativas para esta funcionalidade)
-
-// Middleware para verificar role admin ou rh
-function onlyAdminRh(req, res, next) {
-  if (req.user && ['admin','rh'].includes(req.user.role)) return next();
-  return res.status(403).json({ error: 'Acesso restrito a admin e rh.' });
-}
-
-// 1) Listar usuários (id, nome ou login) – só admin/rh
+// --- Rotas protegidas admin/rh ---
 app.get('/api/users', auth, onlyAdminRh, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -290,7 +257,6 @@ app.get('/api/users', auth, onlyAdminRh, async (req, res) => {
   }
 });
 
-// 2) PATCH para alterar senha de um usuário arbitrário – só admin/rh
 app.patch('/api/users/:id/password', auth, onlyAdminRh, async (req, res) => {
   const targetId = req.params.id;
   const { password } = req.body;
@@ -310,7 +276,7 @@ app.patch('/api/users/:id/password', auth, onlyAdminRh, async (req, res) => {
   }
 });
 
-// Cadastro de denúncia (aberto)
+// --- Denúncias ---
 app.post('/api/denuncias', async (req, res) => {
   try {
     const { nome, categoria, descricao, anonimato } = req.body;
@@ -325,10 +291,9 @@ app.post('/api/denuncias', async (req, res) => {
   }
 });
 
-// Criar novo atendimento (se não houver aberto)
+// --- Atendimento (exemplo: adicionar outras rotas conforme seu projeto) ---
 app.post('/api/atendimentos', auth, async (req, res) => {
   try {
-    // verifica se já existe atendimento aberto desse usuário
     const [abertos] = await pool.query(
       'SELECT id FROM atendimentos WHERE usuario_id = ? AND status = "aberto"', [req.userId]
     );
@@ -344,7 +309,7 @@ app.post('/api/atendimentos', auth, async (req, res) => {
   }
 });
 
-// Listar atendimentos do usuário (ou todos, se admin/rh/compliance)
+// Listar atendimentos
 app.get('/api/atendimentos', auth, async (req, res) => {
   try {
     let query = `
@@ -375,9 +340,8 @@ app.get('/api/atendimentos', auth, async (req, res) => {
     res.status(500).json({ error: 'Erro ao buscar atendimentos.' });
   }
 });
-// Detalhes de um atendimento específico
 
-// Listar mensagens de um atendimento
+// Listar mensagens de atendimento
 app.get('/api/atendimentos/:id/mensagens', auth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -419,7 +383,7 @@ app.post('/api/atendimentos/:id/fechar', auth, async (req, res) => {
   }
 });
 
-// Rota protegida para gestão de denúncias
+// Gestão de denúncias
 app.get('/api/admin/denuncias', auth, onlyRHorCompliance, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -432,23 +396,7 @@ app.get('/api/admin/denuncias', auth, onlyRHorCompliance, async (req, res) => {
   }
 });
 
-
-// ----------- ROTA DE UPLOAD DE ARQUIVOS COM EXTENSÃO CORRETA ----------
-app.post('/api/atendimentos/:id/upload', auth, upload.single('arquivo'), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'Arquivo não enviado.' });
-
-  const atendimentoId = req.params.id;
-  const remetente = ['admin', 'rh', 'compliance'].includes(req.role) ? 'suporte' : 'usuario';
-  const urlArquivo = `/uploads/${req.file.filename}`;
-  const nomeArquivo = req.file.originalname;
-
-  await pool.query(
-    'INSERT INTO mensagens_atendimento (atendimento_id, remetente, mensagem, tipo) VALUES (?, ?, ?, ?)',
-    [atendimentoId, remetente, JSON.stringify({ url: urlArquivo, nome: nomeArquivo }), 'arquivo']
-  );
-  res.json({ url: urlArquivo, nome: nomeArquivo });
-});
-// ----------------------------------------------------------------------
+// Upload de arquivos em memória e Cloudinary
 app.post('/api/atendimentos/:id/upload', auth, upload.single('arquivo'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Arquivo não enviado.' });
 
@@ -457,15 +405,15 @@ app.post('/api/atendimentos/:id/upload', auth, upload.single('arquivo'), async (
     const remetente = ['admin', 'rh', 'compliance'].includes(req.role) ? 'suporte' : 'usuario';
 
     // Upload do arquivo para o Cloudinary
-    const result = await cloudinary.uploader.upload(
-      `data:<span class="math-inline">\{req\.file\.mimetype\};base64,</span>{req.file.buffer.toString('base64')}`,
+    const result = await cloudinary.v2.uploader.upload(
+      `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
       {
-        folder: `ism-agropecuaria/atendimentos/${atendimentoId}`, // Organize seus uploads
-        resource_type: 'auto', // Detecta automaticamente o tipo de recurso
+        folder: `ism-agropecuaria/atendimentos/${atendimentoId}`,
+        resource_type: 'auto',
       }
     );
 
-    const urlArquivo = result.secure_url; // URL HTTPS do arquivo no Cloudinary
+    const urlArquivo = result.secure_url;
     const nomeArquivo = req.file.originalname;
 
     await pool.query(
@@ -477,11 +425,24 @@ app.post('/api/atendimentos/:id/upload', auth, upload.single('arquivo'), async (
     console.error('Erro ao enviar arquivo para Cloudinary ou DB:', err);
     return res.status(500).json({ error: 'Erro ao processar upload de arquivo.' });
   }
-}); 
+});
 
+// Rota para buscar dados do usuário autenticado
+app.get('/api/me', auth, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, nome, login, role, primeiro_login, status_usuario FROM users WHERE id = ?',
+      [req.user.sub]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado.' });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Erro ao buscar dados do usuário:', err);
+    res.status(500).json({ error: 'Erro ao buscar dados do usuário.' });
+  }
+});
 
 const PORT = process.env.PORT || 3001;
-
 app.listen(PORT, () => {
   console.log(`API rodando na porta ${PORT}`);
 });
