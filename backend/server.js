@@ -68,6 +68,7 @@ function onlyRHorCompliance(req, res, next) {
   return res.status(403).json({ error: 'Acesso restrito.' });
 }
 
+// ROTA: Cadastro de usuário seguro (Mantém primeiro_login como TRUE por padrão do DB)
 function onlyAdminRh(req, res, next) {
   if (req.user && ['admin','rh'].includes(req.user.role)) return next();
   return res.status(403).json({ error: 'Acesso restrito a admin e rh.' });
@@ -95,6 +96,7 @@ app.post('/api/cadastrar', async (req, res) => {
   }
 });
 
+// ROTA: Login seguro (Atualizado com lógica de primeiro_login e status_usuario)
 // --- Login ---
 app.post('/api/login', async (req, res) => {
   try {
@@ -208,7 +210,7 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
         primeiro_login: updatedUser.primeiro_login,
         status_usuario: updatedUser.status_usuario
       },
-      JWT_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
@@ -219,6 +221,7 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
   }
 });
 
+// Este job rodará todo dia à meia-noite (00:00)
 // --- JOB: Inativar usuários que não trocaram a senha em 5 dias ---
 cron.schedule('0 0 * * *', async () => {
   console.log('Executando job de inativação de usuários...');

@@ -15,7 +15,6 @@ const LoginPage: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      // ATUALIZE AQUI: use URL relativa!
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
