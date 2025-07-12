@@ -1,142 +1,94 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../AuthContext';
 
-interface User { id: number; username: string; }
-
 const AlterarSenhaPage: React.FC = () => {
-  const { user, token } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
-  const [targetUserId, setTargetUserId] = useState<number>();
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
+  const [senhaAtual, setSenhaAtual] = useState('');
+  const [novaSenha, setNovaSenha] = useState('');
+  const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState(15); // 15 segundos
+  const { user, token, logout } = useAuth();
+  const navigate = useNavigate();
 
-  if (!user) return <div className="text-center py-8">Carregando...</div>;
-
+  // Lógica do contador de redirecionamento após sucesso
   useEffect(() => {
-    if ((user.role === 'admin' || user.role === 'rh')) {
-      axios.get<User[]>('/api/users', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      .then((resp) => {
-        setUsers(resp.data);
-        if (resp.data.length > 0) setTargetUserId(resp.data[0].id);
-      })
-      .catch(() => setMessage('Falha ao carregar usuários.'));
+    if (successMsg && redirectCountdown > 0) {
+      const timer = setTimeout(() => setRedirectCountdown(c => c - 1), 1000);
+      return () => clearTimeout(timer);
     }
-  }, [user.role, token]);
+    if (successMsg && redirectCountdown === 0) {
+      logout(); // Limpa o contexto de autenticação
+      navigate('/login');
+    }
+  }, [successMsg, redirectCountdown, navigate, logout]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage(null);
-
-    if (newPassword !== confirmPassword) {
-      setMessage('As senhas não coincidem.');
-      return;
-    }
+    setError('');
+    setLoading(true);
 
     try {
-      if ((user.role === 'admin' || user.role === 'rh') && targetUserId) {
-        // Admin/RH trocando senha de outro usuário
-        await axios.patch(
-          `/api/users/${targetUserId}/password`,
-          { password: newPassword },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setMessage('Senha do usuário atualizada com sucesso.');
-      } else if (user.primeiro_login) {
-        // PRIMEIRO LOGIN: POST em /api/alterar-senha (não exige senha atual)
-        await axios.post(
-          '/api/alterar-senha',
-          { novaSenha: newPassword },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setMessage('Senha alterada com sucesso! Faça login novamente.');
-        setCurrentPassword('');
-      } else {
-        // Usuário comum trocando a própria senha (exige senha atual)
-        await axios.post(
-          '/api/alterar-senha',
-          { senhaAtual: currentPassword, novaSenha: newPassword },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setMessage('Senha alterada com sucesso.');
-        setCurrentPassword('');
-      }
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (error: any) {
-      setMessage(error.response?.data?.error || 'Erro ao alterar senha.');
+      // Para o primeiro login, senhaAtual pode ser opcional (backend já trata isso!)
+      await axios.post(
+        '/api/alterar-senha',
+        { senhaAtual, novaSenha },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSuccessMsg('Senha alterada com sucesso! Você será redirecionado para o login em 15 segundos...');
+    } catch (err: any) {
+      setError(
+        err.response?.data?.error ||
+        'Erro ao alterar a senha. Tente novamente.'
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded shadow">
+    <div className="min-h-screen flex flex-col items-center justify-center">
       <h2 className="text-2xl font-bold mb-4">Alterar Senha</h2>
-      <form onSubmit={handleSubmit}>
-        {(user.role === 'admin' || user.role === 'rh') && (
-          <div className="mb-4">
-            <label className="block mb-1 font-medium">Selecione um usuário:</label>
-            <select
-              className="w-full border rounded px-3 py-2"
-              value={targetUserId}
-              onChange={e => setTargetUserId(Number(e.target.value))}
-            >
-              {users.map(u => (
-                <option key={u.id} value={u.id}>{u.username}</option>
-              ))}
-            </select>
+      {successMsg ? (
+        <div className="mb-6 text-green-600 text-center">
+          {successMsg}
+          <div className="mt-2 text-sm">
+            Redirecionando para o login em <span className="font-bold">{redirectCountdown}</span> segundos...
           </div>
-        )}
-
-        {!(user.role === 'admin' || user.role === 'rh' || user.primeiro_login) && (
-          <div className="mb-4">
-            <label className="block mb-1 font-medium">Senha Atual:</label>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4 max-w-md w-full">
+          {error && <div className="text-red-500 mb-2">{error}</div>}
+          {/* Apenas pede a senha atual se NÃO for primeiro login */}
+          {!user?.primeiro_login && (
             <input
               type="password"
-              className="w-full border rounded px-3 py-2"
-              value={currentPassword}
-              onChange={e => setCurrentPassword(e.target.value)}
+              value={senhaAtual}
+              onChange={e => setSenhaAtual(e.target.value)}
+              placeholder="Senha atual"
               required
+              className="w-full p-2 border rounded"
             />
-          </div>
-        )}
-
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Nova Senha:</label>
+          )}
           <input
             type="password"
-            className="w-full border rounded px-3 py-2"
-            value={newPassword}
-            onChange={e => setNewPassword(e.target.value)}
+            value={novaSenha}
+            onChange={e => setNovaSenha(e.target.value)}
+            placeholder="Nova senha"
             required
+            className="w-full p-2 border rounded"
           />
-        </div>
-
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Confirme a Nova Senha:</label>
-          <input
-            type="password"
-            className="w-full border rounded px-3 py-2"
-            value={confirmPassword}
-            onChange={e => setConfirmPassword(e.target.value)}
-            required
-          />
-        </div>
-
-        {message && <p className="mb-4 text-center text-red-600">{message}</p>}
-
-        <button
-          type="submit"
-          className="w-full bg-primary text-white py-2 rounded hover:bg-primary-dark transition"
-        >
-          {(user.role === 'admin' || user.role === 'rh')
-            ? 'Atualizar Senha do Usuário'
-            : 'Alterar Minha Senha'}
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="btn-primary w-full py-2"
+            disabled={loading}
+          >
+            {loading ? 'Alterando...' : 'Alterar Senha'}
+          </button>
+        </form>
+      )}
     </div>
   );
 };
