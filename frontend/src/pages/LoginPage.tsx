@@ -15,7 +15,7 @@ const LoginPage: React.FC = () => {
     setError('');
     setLoading(true); // Inicia o estado de carregamento
     try {
-      const res = await fetch('http://localhost:3001/api/login', { // Confirme a URL da sua API
+      const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ login: loginInput, senha }),

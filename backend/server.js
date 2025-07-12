@@ -70,6 +70,14 @@ function onlyRHorCompliance(req, res, next) {
   return res.status(403).json({ error: 'Acesso restrito.' });
 }
 
+// Middleware: permite admin/rh OU qualquer usuário no primeiro login
+function allowAdminRhOrFirstLogin(req, res, next) {
+  if (['admin', 'rh'].includes(req.user.role) || req.user.primeiro_login) {
+    return next();
+  }
+  return res.status(403).json({ error: 'Acesso restrito a admin/rh ou ao primeiro login.' });
+}
+
 // ROTA: Cadastro de usuário seguro (Mantém primeiro_login como TRUE por padrão do DB)
 app.post('/api/cadastrar', async (req, res) => {
   try {
@@ -90,6 +98,16 @@ app.post('/api/cadastrar', async (req, res) => {
     }
     console.error('Erro no cadastro:', err);
     return res.status(500).json({ error: 'Erro ao cadastrar usuário' });
+  }
+});
+
+// Rota para retornar dados do usuário autenticado
+app.get('/api/me', auth, async (req, res) => {
+  try {
+    // Se você salva user no req.user no seu middleware 'auth', só retornar ele
+    res.json(req.user);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar dados do usuário' });
   }
 });
 
@@ -159,14 +177,13 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// ROTA: Alterar senha (Atualizada para marcar 'primeiro_login' como FALSE)
+// ROTA: Alterar senha (permite primeiro login e revalida token)
 app.post('/api/alterar-senha', auth, async (req, res) => {
   try {
     const { senhaAtual, novaSenha } = req.body;
-    // req.user foi adicionado pelo middleware auth
-    const userId = req.userId; // Ou req.user.sub
+    const userId = req.user.sub; // Padrão do JWT!
 
-    if (!novaSenha) { // senhaAtual pode ser opcional no primeiro login
+    if (!novaSenha) {
       return res.status(400).json({ error: 'A nova senha é obrigatória.' });
     }
 
@@ -181,29 +198,25 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
 
     const userInDb = rows[0];
 
-    // Se não for o primeiro login, a senha atual é obrigatória
+    // Se NÃO for primeiro login, senhaAtual é obrigatória e precisa conferir!
     if (!userInDb.primeiro_login) {
       if (!senhaAtual) {
-          return res.status(400).json({ error: 'A senha atual é obrigatória para alterar a senha.' });
+        return res.status(400).json({ error: 'A senha atual é obrigatória para alterar a senha.' });
       }
       const match = await bcrypt.compare(senhaAtual, userInDb.senha_hash);
       if (!match) {
         return res.status(401).json({ error: 'Senha atual incorreta.' });
       }
     }
-    // Para o primeiro login, se você tem uma senha padrão e não a exige aqui,
-    // o 'if (!userInDb.primeiro_login)' acima já trata isso.
 
+    // Se for primeiro login, só troca a senha!
     const novaHash = await bcrypt.hash(novaSenha, 10);
-
-    // Atualiza a senha e define 'primeiro_login' para FALSE
     await pool.query(
       'UPDATE users SET senha_hash = ?, primeiro_login = FALSE, status_usuario = "ativo" WHERE id = ?',
       [novaHash, userId]
     );
 
-    // Opcional: Re-gerar o token para o frontend já ter o 'primeiro_login: false' atualizado
-    // Isso evita que o frontend precise fazer um novo login para atualizar o estado
+    // Gera novo token atualizado para o usuário
     const [updatedUserRows] = await pool.query(
       'SELECT id, nome, login, role, primeiro_login, status_usuario FROM users WHERE id = ?',
       [userId]
@@ -218,10 +231,9 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
         primeiro_login: updatedUser.primeiro_login, // Agora será FALSE
         status_usuario: updatedUser.status_usuario
       },
-      JWT_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
-
 
     res.json({ message: 'Senha alterada com sucesso.', token: newToken, user: updatedUser });
   } catch (err) {
@@ -229,6 +241,7 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
     res.status(500).json({ error: 'Erro ao alterar senha.' });
   }
 });
+
 
 
 // JOB AGENDADO: Inativar usuários que não alteraram a senha em 5 dias
