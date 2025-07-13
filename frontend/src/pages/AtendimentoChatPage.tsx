@@ -21,10 +21,9 @@ const AtendimentoChatPage: React.FC = () => {
   const [status, setStatus] = useState<'aberto' | 'fechado'>('aberto');
   const [mensagemInfo, setMensagemInfo] = useState('');
   const [dragActive, setDragActive] = useState(false);
-  const endRef = useRef<HTMLDivElement>(null);
 
-  // Armazena quantidade anterior de mensagens para scroll inteligente
-  const prevMsgsCount = useRef(0);
+  // Ref para o quadro de mensagens, não para o fim das mensagens
+  const quadroRef = useRef<HTMLDivElement>(null);
 
   // Carrega ou cria atendimento
   useEffect(() => {
@@ -42,7 +41,6 @@ const AtendimentoChatPage: React.FC = () => {
         const data = await res.json();
         setAtendimentoId(data.atendimentoId);
 
-        // Buscar status do atendimento
         if (data.atendimentoId) {
           const resStatus = await fetch(`/api/atendimentos`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -78,6 +76,13 @@ const AtendimentoChatPage: React.FC = () => {
         const meuAtendimento = atendimentos.find((a: any) => a.id === atendimentoId);
         if (meuAtendimento) setStatus(meuAtendimento.status);
 
+        // Só rola o quadro (não a página) para o fim, SE estiver quase no fim
+        if (quadroRef.current) {
+          const { scrollHeight, clientHeight, scrollTop } = quadroRef.current;
+          if (scrollHeight - scrollTop - clientHeight < 150) {
+            quadroRef.current.scrollTop = quadroRef.current.scrollHeight;
+          }
+        }
       } catch (e) {
         setErro('Erro ao buscar mensagens');
       }
@@ -86,14 +91,6 @@ const AtendimentoChatPage: React.FC = () => {
     const interval = setInterval(fetchMensagens, 3500);
     return () => clearInterval(interval);
   }, [token, atendimentoId]);
-
-  // Scrolla para o fim só se novas mensagens chegaram
-  useEffect(() => {
-    if (mensagens.length > prevMsgsCount.current) {
-      endRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-    prevMsgsCount.current = mensagens.length;
-  }, [mensagens.length]);
 
   // Envia mensagem de texto
   const enviarMensagem = async (e: React.FormEvent) => {
@@ -109,6 +106,12 @@ const AtendimentoChatPage: React.FC = () => {
         body: JSON.stringify({ mensagem: texto.trim() })
       });
       setTexto('');
+      // Não faz scroll na página, só no quadro se necessário
+      if (quadroRef.current) {
+        setTimeout(() => {
+          quadroRef.current!.scrollTop = quadroRef.current!.scrollHeight;
+        }, 100);
+      }
     } catch (e) {
       setErro('Erro ao enviar mensagem');
     }
@@ -133,6 +136,11 @@ const AtendimentoChatPage: React.FC = () => {
         setMensagemInfo(data.error);
       }
       setTimeout(() => setMensagemInfo(''), 4000);
+      if (quadroRef.current) {
+        setTimeout(() => {
+          quadroRef.current!.scrollTop = quadroRef.current!.scrollHeight;
+        }, 100);
+      }
     } catch {
       setMensagemInfo('Falha ao enviar arquivo');
       setTimeout(() => setMensagemInfo(''), 4000);
@@ -165,12 +173,7 @@ const AtendimentoChatPage: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-[#f7f8fa] pt-24 pb-8">
-      <div
-        className="
-          bg-white shadow-2xl rounded-2xl w-full max-w-2xl mx-auto flex flex-col h-[75vh]
-          px-0 sm:px-8"
-        style={{ minWidth: 0 }}
-      >
+      <div className="bg-white shadow-2xl rounded-2xl w-full max-w-2xl mx-auto flex flex-col h-[75vh] px-0 sm:px-8" style={{ minWidth: 0 }}>
         {/* Título */}
         <div className="p-4 sm:p-6 border-b rounded-t-2xl text-lg sm:text-2xl font-bold text-blue-900 text-center bg-gradient-to-r from-[#eaf2ff] to-[#f6faff]">
           Atendimento ao Colaborador
@@ -181,7 +184,11 @@ const AtendimentoChatPage: React.FC = () => {
           )}
         </div>
         {/* Quadro de mensagens com scroll independente */}
-        <div className="flex-1 overflow-y-auto px-2 sm:px-6 py-4 space-y-2" style={{ minWidth: 0 }}>
+        <div
+          ref={quadroRef}
+          className="flex-1 overflow-y-auto px-2 sm:px-6 py-4 space-y-2"
+          style={{ minWidth: 0, maxHeight: '100%' }}
+        >
           {mensagemInfo && (
             <div className="text-center text-green-700 font-bold mb-3">{mensagemInfo}</div>
           )}
@@ -227,7 +234,6 @@ const AtendimentoChatPage: React.FC = () => {
               </div>
             </div>
           ))}
-          <div ref={endRef}></div>
         </div>
         {/* Formulário de envio */}
         <form
