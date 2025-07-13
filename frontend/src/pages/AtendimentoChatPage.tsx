@@ -22,7 +22,9 @@ const AtendimentoChatPage: React.FC = () => {
   const [mensagemInfo, setMensagemInfo] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
-  const isFirstLoad = useRef(true);
+
+  // Armazena quantidade anterior de mensagens para scroll inteligente
+  const prevMsgsCount = useRef(0);
 
   // Carrega ou cria atendimento
   useEffect(() => {
@@ -57,7 +59,7 @@ const AtendimentoChatPage: React.FC = () => {
     fetchAtendimento();
   }, [token]);
 
-  // Carrega mensagens
+  // Carrega mensagens periodicamente
   useEffect(() => {
     if (!atendimentoId) return;
     const fetchMensagens = async () => {
@@ -66,12 +68,7 @@ const AtendimentoChatPage: React.FC = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
-        setMensagens(prev => {
-          if (!isFirstLoad.current && data.length > prev.length) {
-            setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 200);
-          }
-          return data;
-        });
+        setMensagens(data);
 
         // Atualiza status do atendimento
         const resStatus = await fetch(`/api/atendimentos`, {
@@ -81,7 +78,6 @@ const AtendimentoChatPage: React.FC = () => {
         const meuAtendimento = atendimentos.find((a: any) => a.id === atendimentoId);
         if (meuAtendimento) setStatus(meuAtendimento.status);
 
-        isFirstLoad.current = false;
       } catch (e) {
         setErro('Erro ao buscar mensagens');
       }
@@ -90,6 +86,14 @@ const AtendimentoChatPage: React.FC = () => {
     const interval = setInterval(fetchMensagens, 3500);
     return () => clearInterval(interval);
   }, [token, atendimentoId]);
+
+  // Scrolla para o fim só se novas mensagens chegaram
+  useEffect(() => {
+    if (mensagens.length > prevMsgsCount.current) {
+      endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    prevMsgsCount.current = mensagens.length;
+  }, [mensagens.length]);
 
   // Envia mensagem de texto
   const enviarMensagem = async (e: React.FormEvent) => {
@@ -105,8 +109,6 @@ const AtendimentoChatPage: React.FC = () => {
         body: JSON.stringify({ mensagem: texto.trim() })
       });
       setTexto('');
-      // Após enviar, rola para o fim
-      setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     } catch (e) {
       setErro('Erro ao enviar mensagem');
     }
@@ -130,10 +132,10 @@ const AtendimentoChatPage: React.FC = () => {
       } else if (data.error) {
         setMensagemInfo(data.error);
       }
-      // Após upload, rola para o fim
-      setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      setTimeout(() => setMensagemInfo(''), 4000);
     } catch {
       setMensagemInfo('Falha ao enviar arquivo');
+      setTimeout(() => setMensagemInfo(''), 4000);
     }
   };
 
@@ -149,6 +151,7 @@ const AtendimentoChatPage: React.FC = () => {
       if (res.ok) {
         setMensagemInfo('Atendimento encerrado com sucesso.');
         setStatus('fechado');
+        setTimeout(() => setMensagemInfo(''), 4000);
       } else {
         setErro(data.error || 'Erro ao encerrar atendimento');
       }
@@ -162,8 +165,14 @@ const AtendimentoChatPage: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-[#f7f8fa] pt-24 pb-8">
-      <div className="bg-white shadow-2xl rounded-2xl w-full max-w-2xl flex flex-col h-[75vh] px-0 sm:px-8">
-        <div className="p-6 border-b rounded-t-2xl text-2xl font-bold text-blue-900 text-center bg-gradient-to-r from-[#eaf2ff] to-[#f6faff]">
+      <div
+        className="
+          bg-white shadow-2xl rounded-2xl w-full max-w-2xl mx-auto flex flex-col h-[75vh]
+          px-0 sm:px-8"
+        style={{ minWidth: 0 }}
+      >
+        {/* Título */}
+        <div className="p-4 sm:p-6 border-b rounded-t-2xl text-lg sm:text-2xl font-bold text-blue-900 text-center bg-gradient-to-r from-[#eaf2ff] to-[#f6faff]">
           Atendimento ao Colaborador
           {user && (
             <div className="text-base font-medium text-blue-700 mt-1">
@@ -171,7 +180,8 @@ const AtendimentoChatPage: React.FC = () => {
             </div>
           )}
         </div>
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2">
+        {/* Quadro de mensagens com scroll independente */}
+        <div className="flex-1 overflow-y-auto px-2 sm:px-6 py-4 space-y-2" style={{ minWidth: 0 }}>
           {mensagemInfo && (
             <div className="text-center text-green-700 font-bold mb-3">{mensagemInfo}</div>
           )}
@@ -188,7 +198,7 @@ const AtendimentoChatPage: React.FC = () => {
               key={m.id}
               className={`flex ${m.remetente === 'usuario' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`max-w-[70%] px-4 py-2 rounded-2xl shadow text-white ${
+              <div className={`max-w-[70%] px-3 sm:px-4 py-2 rounded-2xl shadow text-white ${
                 m.remetente === 'usuario'
                   ? 'bg-blue-900 self-end'
                   : 'bg-gray-400 self-start'
@@ -211,7 +221,7 @@ const AtendimentoChatPage: React.FC = () => {
                     </a>
                   );
                 })() : (
-                  <div className="text-sm">{m.mensagem}</div>
+                  <div className="text-sm break-words">{m.mensagem}</div>
                 )}
                 <div className="text-xs text-right mt-1 opacity-70">{new Date(m.enviado_em).toLocaleString()}</div>
               </div>
@@ -222,7 +232,7 @@ const AtendimentoChatPage: React.FC = () => {
         {/* Formulário de envio */}
         <form
           onSubmit={enviarMensagem}
-          className={`flex items-center p-6 border-t gap-3 bg-[#f7f8fa] rounded-b-2xl relative ${dragActive ? 'border-4 border-blue-400' : ''}`}
+          className={`flex flex-col sm:flex-row items-center p-4 sm:p-6 border-t gap-2 sm:gap-3 bg-[#f7f8fa] rounded-b-2xl relative ${dragActive ? 'border-4 border-blue-400' : ''}`}
           onDragOver={e => {
             e.preventDefault(); e.stopPropagation();
             setDragActive(true);
@@ -258,7 +268,7 @@ const AtendimentoChatPage: React.FC = () => {
             <UploadCloud size={28} className="text-blue-800" />
           </label>
           <input
-            className="flex-1 px-4 py-3 border rounded-xl bg-white text-lg"
+            className="flex-1 px-4 py-3 border rounded-xl bg-white text-base sm:text-lg"
             placeholder={status === 'fechado' ? "Atendimento encerrado" : "Digite sua mensagem..."}
             value={texto}
             onChange={e => setTexto(e.target.value)}
@@ -267,7 +277,7 @@ const AtendimentoChatPage: React.FC = () => {
           />
           <button
             type="submit"
-            className={`bg-blue-900 text-white rounded-xl px-8 py-3 font-bold text-lg shadow transition ${status === 'fechado' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+            className={`bg-blue-900 text-white rounded-xl w-full sm:w-auto px-8 py-3 font-bold text-lg shadow transition ${status === 'fechado' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
             disabled={status === 'fechado'}
           >
             Enviar
@@ -277,7 +287,7 @@ const AtendimentoChatPage: React.FC = () => {
             <button
               type="button"
               onClick={encerrarAtendimento}
-              className="ml-2 bg-red-600 hover:bg-red-700 text-white rounded-xl px-6 py-3 font-bold text-lg shadow transition"
+              className="ml-0 sm:ml-2 bg-red-600 hover:bg-red-700 text-white rounded-xl w-full sm:w-auto px-6 py-3 font-bold text-lg shadow transition"
             >
               Encerrar Chat
             </button>
@@ -295,3 +305,4 @@ const AtendimentoChatPage: React.FC = () => {
 };
 
 export default AtendimentoChatPage;
+
