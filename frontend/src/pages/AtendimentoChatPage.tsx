@@ -8,7 +8,7 @@ interface Mensagem {
   remetente: string;
   mensagem: string;
   enviado_em: string;
-  tipo?: string; // 'texto' ou 'arquivo'
+  tipo?: string;
 }
 
 const AtendimentoChatPage: React.FC = () => {
@@ -305,4 +305,3 @@ const AtendimentoChatPage: React.FC = () => {
 };
 
 export default AtendimentoChatPage;
-
