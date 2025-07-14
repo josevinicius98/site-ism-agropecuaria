@@ -67,16 +67,13 @@ const Portal: React.FC = () => {
           <button onClick={() => nav('/alterar-senha')} className={`${baseButton} ${sizes} ${primaryColor}`}>
             <KeyRound size={20} /> Alterar Senha
           </button>
-        </div>
 
-        {/* --- Gestão de usuários visível só para admin/rh --- */}
-        {(userRole === 'admin' || userRole === 'rh') && (
-          <div className="mt-8 bg-gray-100 rounded-xl p-6 shadow">
-            <h2 className="text-2xl font-bold text-[#070735] mb-4">Gestão de Usuários</h2>
-            <UserManagement />
-          </div>
-        )}
-        {/* --- Fim Gestão de usuários --- */}
+          {userRole === 'admin' && (
+          <button onClick={() => nav('/gestao-usuarios')} className={`${baseButton} ${sizes} ${primaryColor}`}>
+            <Users2 size={20} /> Gestão de Usuários
+          </button>
+          )}
+        </div>
 
         <button
           onClick={() => {
