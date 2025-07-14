@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../AuthContext'; // <-- Pegue o token aqui!
+import { useAuth } from '../AuthContext'; // PEGUE O TOKEN!
 
 interface Usuario {
   id: number;
@@ -10,18 +10,18 @@ interface Usuario {
 }
 
 const UserManagement: React.FC = () => {
-  const { token } = useAuth(); // <-- PEGUE O TOKEN DO CONTEXTO!
+  const { token } = useAuth(); // USE O TOKEN DO CONTEXTO!
   const [users, setUsers] = useState<Usuario[]>([]);
-  const [senhaNova, setSenhaNova] = useState<{[id: number]: string}>({});
+  const [senhaNova, setSenhaNova] = useState<{ [id: number]: string }>({});
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
 
   // Carrega usuários ao montar o componente
   useEffect(() => {
-    if (!token) return; // Só faz fetch se tiver token
+    if (!token) return;
     fetch('/api/users', {
       headers: {
-        'Authorization': `Bearer ${token}` // <-- ENVIE O TOKEN!
+        'Authorization': `Bearer ${token}`
       }
     })
       .then(res => {
@@ -35,7 +35,7 @@ const UserManagement: React.FC = () => {
       .catch(err => setMsg(err.message));
   }, [token]);
 
-  // Função para alterar senha de um usuário
+  // Alterar senha
   const alterarSenha = async (id: number) => {
     if (!senhaNova[id] || senhaNova[id].length < 6) {
       setMsg('A senha precisa ter ao menos 6 caracteres.');
@@ -46,7 +46,7 @@ const UserManagement: React.FC = () => {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // <-- ENVIE O TOKEN!
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({ password: senhaNova[id] })
     });
@@ -55,14 +55,14 @@ const UserManagement: React.FC = () => {
     setSenhaNova(s => ({ ...s, [id]: '' }));
   };
 
-  // Função para ativar/inativar usuário
+  // Alterar status
   const alterarStatus = async (id: number, status: 'ativo' | 'inativo') => {
     setLoading(true);
     const res = await fetch(`/api/users/${id}/status`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // <-- ENVIE O TOKEN!
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({ status_usuario: status })
     });
