@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../AuthContext'; // <-- Pegue o token aqui!
 
 interface Usuario {
   id: number;
@@ -9,17 +10,32 @@ interface Usuario {
 }
 
 const UserManagement: React.FC = () => {
+  const { token } = useAuth(); // <-- PEGUE O TOKEN DO CONTEXTO!
   const [users, setUsers] = useState<Usuario[]>([]);
   const [senhaNova, setSenhaNova] = useState<{[id: number]: string}>({});
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
 
+  // Carrega usuários ao montar o componente
   useEffect(() => {
-    fetch('/api/users')
-      .then(res => res.json())
-      .then(data => setUsers(data));
-  }, []);
+    if (!token) return; // Só faz fetch se tiver token
+    fetch('/api/users', {
+      headers: {
+        'Authorization': `Bearer ${token}` // <-- ENVIE O TOKEN!
+      }
+    })
+      .then(res => {
+        if (res.status === 401) throw new Error('Sessão expirada, faça login novamente.');
+        return res.json();
+      })
+      .then(data => {
+        if (!Array.isArray(data)) throw new Error('Falha ao buscar usuários');
+        setUsers(data);
+      })
+      .catch(err => setMsg(err.message));
+  }, [token]);
 
+  // Função para alterar senha de um usuário
   const alterarSenha = async (id: number) => {
     if (!senhaNova[id] || senhaNova[id].length < 6) {
       setMsg('A senha precisa ter ao menos 6 caracteres.');
@@ -28,7 +44,10 @@ const UserManagement: React.FC = () => {
     setLoading(true);
     const res = await fetch(`/api/users/${id}/password`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // <-- ENVIE O TOKEN!
+      },
       body: JSON.stringify({ password: senhaNova[id] })
     });
     setLoading(false);
@@ -36,11 +55,15 @@ const UserManagement: React.FC = () => {
     setSenhaNova(s => ({ ...s, [id]: '' }));
   };
 
+  // Função para ativar/inativar usuário
   const alterarStatus = async (id: number, status: 'ativo' | 'inativo') => {
     setLoading(true);
     const res = await fetch(`/api/users/${id}/status`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // <-- ENVIE O TOKEN!
+      },
       body: JSON.stringify({ status_usuario: status })
     });
     setLoading(false);

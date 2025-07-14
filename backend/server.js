@@ -248,10 +248,11 @@ cron.schedule('0 0 * * *', async () => {
 });
 
 // --- Rotas protegidas admin/rh ---
+// --- Listar todos usuários com todos os campos relevantes para a gestão ---
 app.get('/api/users', auth, onlyAdminRh, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT id, nome AS username, status_usuario FROM users ORDER BY nome'
+      'SELECT id, nome, login, role, status_usuario FROM users ORDER BY nome'
     );
     res.json(rows);
   } catch (err) {
@@ -259,6 +260,8 @@ app.get('/api/users', auth, onlyAdminRh, async (req, res) => {
     res.status(500).json({ error: 'Erro ao listar usuários.' });
   }
 });
+
+
 
 app.patch('/api/users/:id/password', auth, onlyAdminRh, async (req, res) => {
   const targetId = req.params.id;
