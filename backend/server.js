@@ -251,7 +251,7 @@ cron.schedule('0 0 * * *', async () => {
 app.get('/api/users', auth, onlyAdminRh, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT id, nome AS username FROM users ORDER BY nome'
+      'SELECT id, nome AS username, status_usuario FROM users ORDER BY nome'
     );
     res.json(rows);
   } catch (err) {
@@ -274,10 +274,27 @@ app.patch('/api/users/:id/password', auth, onlyAdminRh, async (req, res) => {
     );
     res.sendStatus(204);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Falha ao alterar senha do usuário.' });
   }
 });
+
+app.patch('/api/users/:id/status', auth, onlyAdminRh, async (req, res) => {
+  const userId = req.params.id;
+  const { status_usuario } = req.body;
+  if (!['ativo', 'inativo'].includes(status_usuario)) {
+    return res.status(400).json({ error: 'Status inválido' });
+  }
+  try {
+    await pool.query(
+      'UPDATE users SET status_usuario = ? WHERE id = ?',
+      [status_usuario, userId]
+    );
+    res.sendStatus(204);
+  } catch (err) {
+    res.status(500).json({ error: 'Falha ao atualizar status do usuário.' });
+  }
+});
+
 
 // --- Denúncias ---
 app.post('/api/denuncias', async (req, res) => {
