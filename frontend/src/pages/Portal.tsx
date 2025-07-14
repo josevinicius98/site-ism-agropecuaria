@@ -72,9 +72,9 @@ const Portal: React.FC = () => {
           <button onClick={() => nav('/gestao-usuarios')} className={`${baseButton} ${sizes} ${primaryColor}`}>
             <Users2 size={20} /> Gestão de Usuários
           </button>
-          )}
+          )} 
           
-          {(userRole === 'admin' || userRole === 'rh') && (
+          {userRole === 'admin' && (
           <button onClick={() => nav('/auditoria')} className={`${baseButton} ${sizes} ${primaryColor}`}>
             <ShieldCheck size={20} /> Auditoria
           </button>
