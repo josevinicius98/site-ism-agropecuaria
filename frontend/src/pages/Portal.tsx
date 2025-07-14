@@ -16,32 +16,24 @@ const Portal: React.FC = () => {
   const nav = useNavigate();
   const { logout, user: initialUser } = useAuth();
 
-  // Estados para nome e papel do usuário
-  const [userName, setUserName] = useState<string>('');
-  const [userRole, setUserRole] = useState<string>(initialUser?.role || '');
+  // Só usado para exibir o nome (não para controlar botão)
+  const [userName, setUserName] = useState<string>(initialUser?.nome || '');
+  const userRole = initialUser?.role || '';
 
-  // Estilos dos botões
+  // Botão base style
   const baseButton = 'flex items-center gap-2 text-white font-semibold rounded-lg transition focus:outline-none';
-  const sizes     = 'py-2 px-6 text-base';
+  const sizes = 'py-2 px-6 text-base';
   const primaryColor = 'bg-[#070735] hover:bg-opacity-90';
 
   useEffect(() => {
-    // Busca os dados do usuário autenticado
-    fetch('/api/me', { credentials: 'include' })
-      .then(res => {
-        if (!res.ok) throw new Error('Não foi possível buscar os dados do usuário');
-        return res.json();
-      })
+    // Busca opcional: apenas para mostrar nome atualizado
+    fetch('/api/me')
+      .then(res => res.ok ? res.json() : null)
       .then(data => {
-        setUserName(data.name);
-        setUserRole(data.role);
+        if (data?.nome) setUserName(data.nome);
       })
-      .catch(err => {
-        console.error(err);
-        // opcional: redirecionar para login se falhar
-        // nav('/login');
-      });
-  }, [nav]);
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
@@ -50,7 +42,7 @@ const Portal: React.FC = () => {
           Portal do Colaborador
         </h1>
         <p className="text-lg font-semibold mb-6 text-gray-800 text-center">
-          Olá, seja bem-vindo ao seu Portal.
+          Olá, seja bem-vindo ao seu Portal{userName ? `, ${userName}` : ''}.
         </p>
         <p className="text-base mb-8 text-gray-600 text-center">
           Aqui você pode acessar seus dashboards, enviar solicitações e acompanhar suas atividades.
@@ -80,11 +72,10 @@ const Portal: React.FC = () => {
               <UserPlus size={20} /> Cadastro de Usuário
             </button>
           )}
-          {userName && (
-            <button onClick={() => nav('/alterar-senha')} className={`${baseButton} ${sizes} ${primaryColor}`}>
-              <KeyRound size={20} /> Alterar Senha
-            </button>
-          )}
+          {/* O botão "Alterar Senha" sempre aparece */}
+          <button onClick={() => nav('/alterar-senha')} className={`${baseButton} ${sizes} ${primaryColor}`}>
+            <KeyRound size={20} /> Alterar Senha
+          </button>
         </div>
         <button
           onClick={() => {
