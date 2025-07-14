@@ -74,6 +74,36 @@ function onlyAdminRh(req, res, next) {
   return res.status(403).json({ error: 'Acesso restrito a admin e rh.' });
 }
 
+// Função para registrar auditoria
+async function registrarAuditoria(usuarioId, acao, detalhes = '') {
+  try {
+    await pool.query(
+      'INSERT INTO auditoria (usuario_id, acao, detalhes) VALUES (?, ?, ?)',
+      [usuarioId, acao, detalhes]
+    );
+  } catch (e) {
+    // Não bloqueie o fluxo principal por falha de auditoria!
+    console.error('Erro ao registrar auditoria:', e);
+  }
+}
+
+// --- Rota de auditoria ---
+// Apenas admin e rh podem acessar os logs de auditoria
+app.get('/api/auditoria', auth, onlyAdminRh, async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT a.id, a.acao, a.detalhes, a.data_hora, u.nome AS usuario_nome, u.login
+      FROM auditoria a
+      JOIN users u ON a.usuario_id = u.id
+      ORDER BY a.data_hora DESC
+      LIMIT 200
+    `);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar logs de auditoria.' });
+  }
+});
+
 // --- Cadastro de usuário ---
 app.post('/api/cadastrar', async (req, res) => {
   try {
@@ -85,6 +115,12 @@ app.post('/api/cadastrar', async (req, res) => {
     await pool.query(
       'INSERT INTO users (nome, login, senha_hash, role) VALUES (?, ?, ?, ?)',
       [nome, login, hash, role || 'colaborador']
+    );
+    // --- AUDITORIA: Cadastro de usuário (aqui usuário pode ser null, ou admin se tiver sessão)
+    await registrarAuditoria(
+      req.userId || null, // se for um admin, registra o id do admin, senão null
+      'cadastro_usuario',
+      `Usuário cadastrado: login=${login}, nome=${nome}, role=${role}`
     );
     return res.status(201).json({ message: 'Usuário cadastrado com sucesso' });
   } catch (err) {
@@ -139,6 +175,9 @@ app.post('/api/login', async (req, res) => {
       JWT_SECRET,
       { expiresIn: '1h' }
     );
+    
+    // --- AUDITORIA: login
+    await registrarAuditoria(user.id, 'login', 'Usuário fez login no sistema.');
 
     return res.json({
       token,
@@ -194,6 +233,9 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
       'UPDATE users SET senha_hash = ?, primeiro_login = FALSE, status_usuario = "ativo" WHERE id = ?',
       [novaHash, userId]
     );
+
+    // AUDITORIA: alteração de senha própria
+    await registrarAuditoria(userId, 'alterar_senha', 'Usuário alterou a própria senha.');
 
     // Gera novo token atualizado
     const [updatedUserRows] = await pool.query(
@@ -275,6 +317,8 @@ app.patch('/api/users/:id/password', auth, onlyAdminRh, async (req, res) => {
       'UPDATE users SET senha_hash = ? WHERE id = ?',
       [hash, targetId]
     );
+    // AUDITORIA: admin/rh alterou senha de outro usuário
+    await registrarAuditoria(req.user.sub, 'admin_alterar_senha', `Alterou a senha do user_id=${targetId}`);
     res.sendStatus(204);
   } catch (err) {
     res.status(500).json({ error: 'Falha ao alterar senha do usuário.' });
@@ -292,6 +336,8 @@ app.patch('/api/users/:id/status', auth, onlyAdminRh, async (req, res) => {
       'UPDATE users SET status_usuario = ? WHERE id = ?',
       [status_usuario, userId]
     );
+    // AUDITORIA: admin/rh ativou/inativou um usuário
+    await registrarAuditoria(req.user.sub, 'alterar_status_usuario', `Alterou status do user_id=${userId} para ${status_usuario}`);
     res.sendStatus(204);
   } catch (err) {
     res.status(500).json({ error: 'Falha ao atualizar status do usuário.' });
@@ -307,6 +353,10 @@ app.post('/api/denuncias', async (req, res) => {
       'INSERT INTO denuncias (nome, categoria, descricao, anonimato) VALUES (?, ?, ?, ?)',
       [anonimato ? null : nome, categoria, descricao, anonimato ? 1 : 0]
     );
+    // Auditoria apenas se não for anônimo e usuário estiver autenticado
+    if (!anonimato && req.userId) {
+      await registrarAuditoria(req.userId, 'nova_denuncia', `Categoria: ${categoria}`);
+    }
     return res.status(201).json({ message: 'Denúncia registrada com sucesso' });
   } catch (err) {
     console.error('Erro ao processar denúncia:', err);
@@ -389,6 +439,8 @@ app.post('/api/atendimentos/:id/mensagens', auth, async (req, res) => {
       'INSERT INTO mensagens_atendimento (atendimento_id, remetente, mensagem) VALUES (?, ?, ?)',
       [id, remetente, mensagem]
     );
+    // AUDITORIA: envio mensagem no chat
+    await registrarAuditoria(req.user.sub, 'enviar_mensagem', `Mensagem enviada no atendimento ${id}`);
     res.status(201).json({ message: 'Mensagem enviada.' });
   } catch (err) {
     console.error('Erro ao enviar mensagem:', err);
@@ -443,6 +495,8 @@ app.post('/api/atendimentos/:id/upload', auth, upload.single('arquivo'), async (
       'INSERT INTO mensagens_atendimento (atendimento_id, remetente, mensagem, tipo) VALUES (?, ?, ?, ?)',
       [atendimentoId, remetente, JSON.stringify({ url: urlArquivo, nome: nomeArquivo }), 'arquivo']
     );
+    // AUDITORIA: upload de arquivo no chat
+    await registrarAuditoria(req.user.sub, 'upload_arquivo', `Upload no atendimento ${atendimentoId}: ${nomeArquivo}`);
     res.json({ url: urlArquivo, nome: nomeArquivo });
   } catch (err) {
     console.error('Erro ao enviar arquivo para Cloudinary ou DB:', err);
@@ -464,6 +518,14 @@ app.get('/api/me', auth, async (req, res) => {
     res.status(500).json({ error: 'Erro ao buscar dados do usuário.' });
   }
 });
+
+// Função para registrar auditoria
+async function registrarAuditoria(usuarioId, acao, detalhes = '') {
+  await pool.query(
+    'INSERT INTO auditoria (usuario_id, acao, detalhes) VALUES (?, ?, ?)',
+    [usuarioId, acao, detalhes]
+  );
+}
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

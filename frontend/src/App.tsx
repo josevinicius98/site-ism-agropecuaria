@@ -7,21 +7,22 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 
 // Seus imports de páginas
-import Portal from './pages/Portal';
-import LoginPage from './pages/LoginPage';
-import HomePage from './pages/HomePage';
-import AboutPage from './pages/AboutPage';
-import ActivitiesPage from './pages/ActivitiesPage';
-import ContactPage from './pages/ContactPage';
-import CadastroPage from './pages/CadastroPage';
-import LinksPage from './pages/Links';
-import DenunciasPage from './pages/DenunciaPage';
-import AdminDenunciasPage from './pages/AdminDenuncias';
-import AlterarSenhaPage from './pages/AlterarSenhaPage';
-import AtendimentoChatPage from './pages/AtendimentoChatPage';
-import PainelAtendimentosPage from './pages/PainelAtendimentosPage';
-import AtendimentoChatSuportePage from './pages/AtendimentoChatSuportePage';
+import Portal from './pages/Portal'; // Importar a página do portal
+import LoginPage from './pages/LoginPage'; // Importar a página de login
+import HomePage from './pages/HomePage'; // Importar a página inicial
+import AboutPage from './pages/AboutPage';  // Importar a página de sobre
+import ActivitiesPage from './pages/ActivitiesPage'; // Importar a página de atividades
+import ContactPage from './pages/ContactPage';  // Importar a página de contato
+import CadastroPage from './pages/CadastroPage'; // Importar a página de cadastro
+import LinksPage from './pages/Links'; // Importar a página de links
+import DenunciasPage from './pages/DenunciaPage'; // Importar a página de denúncias
+import AdminDenunciasPage from './pages/AdminDenuncias'; // Importar a página de gestão de denúncias
+import AlterarSenhaPage from './pages/AlterarSenhaPage'; // Importar a página de alteração de senha
+import AtendimentoChatPage from './pages/AtendimentoChatPage'; // Importar a página de atendimento
+import PainelAtendimentosPage from './pages/PainelAtendimentosPage'; // Importar a página de gestão de atendimentos
+import AtendimentoChatSuportePage from './pages/AtendimentoChatSuportePage'; // Importar a página de gestão de usuários
 import UserManagementPage from './pages/UserManagementPage'; // Importar a página de gestão de usuários
+import AuditoriaPage from './pages/AuditoriaPage'; // Importar a página de auditoria
 
 // Criar um componente auxiliar para usar o hook useAuth
 const AppContent: React.FC = () => {
@@ -107,9 +108,11 @@ const AppContent: React.FC = () => {
           <Route path="/painel-atendimentos" element={
             <PrivateRoute requiredRole={["admin", "rh", "compliance"]}>
               <PainelAtendimentosPage />
-            </PrivateRoute>
+            </PrivateRoute> 
           } />
-          <Route path="/gestao-usuarios" element={<UserManagementPage />} />
+          <Route path="/gestao-usuarios" element={<UserManagementPage />} /> {/* Página de gestão de usuários */}
+          <Route path="/auditoria" element={<AuditoriaPage />} /> {/* Página de auditoria */}
+
         </Routes>
       </main>
       <Footer setCurrentPage={setCurrentPage} />
