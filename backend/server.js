@@ -519,14 +519,6 @@ app.get('/api/me', auth, async (req, res) => {
   }
 });
 
-// Função para registrar auditoria
-async function registrarAuditoria(usuarioId, acao, detalhes = '') {
-  await pool.query(
-    'INSERT INTO auditoria (usuario_id, acao, detalhes) VALUES (?, ?, ?)',
-    [usuarioId, acao, detalhes]
-  );
-}
-
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`API rodando na porta ${PORT}`);
