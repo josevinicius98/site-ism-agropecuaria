@@ -18,7 +18,7 @@ const ActivitiesPage: React.FC = () => {
       caption: "Gado de corte de alta qualidade" // Legenda da imagem
     },
     {
-      src: '/assets/pec2.jpeg',
+      src: '/assets/misturador_vermelho.jpeg',
       alt: "Curral de manejo",
       caption: "Estrutura para manejo do rebanho"
     },
@@ -75,13 +75,16 @@ const ActivitiesPage: React.FC = () => {
             <div>
               <p className="text-accent mb-6">
                 Excelência na criação de gado de corte com foco em qualidade e bem-estar animal
-Na ISM Agropecuária, criamos gado de corte com disciplina científica e paixão pelo resultado. Cada animal cresce em pastagens manejadas, recebe nutrição de precisão e é monitorado digitalmente — garantindo carne mais macia, sabor superior e padrões sanitários que superam as exigências do mercado.
-
-Nossa principal área de atuação é a pecuária
-É nela que aplicamos nossa força de inovação. Utilizamos tecnologias de rastreabilidade por RFID, análises de dados de desempenho individual e protocolos de sanidade preventiva. Assim, transformamos cada etapa — da seleção genética ao embarque — em um processo mensurável, transparente e escalável.
-
-Contamos com uma equipe especializada
-Nosso time reúne zootecnistas, veterinários e engenheiros agrônomos, todos focados no bem-estar animal e na otimização produtiva. Eles trabalham lado a lado, analisando resultados em tempo real e ajustando dietas, sanidade e manejo constantemente. O compromisso é simples: gado saudável produz carne de excelência.
+Na ISM Agropecuária, criamos gado de corte com disciplina científica e paixão pelo resultado. 
+Cada animal cresce em pastagens manejadas, recebe nutrição de precisão e é monitorado digitalmente — 
+garantindo carne mais macia, sabor superior e padrões sanitários que superam as exigências do mercado. 
+Nossa principal área de atuação é a pecuária. É nela que aplicamos nossa força de inovação. 
+Utilizamos tecnologias de rastreabilidade por RFID, análises de dados de desempenho individual e 
+protocolos de sanidade preventiva. Assim, transformamos cada etapa — da seleção genética ao embarque — 
+em um processo mensurável, transparente e escalável. Contamos com uma equipe especializada
+Nosso time reúne zootecnistas, veterinários, engenheiros agrônomos e o back-office corporativo, todos focados no bem-estar animal e na otimização produtiva.
+Eles trabalham lado a lado, analisando resultados em tempo real e ajustando dietas, sanidade e manejo constantemente. 
+O compromisso é simples: gado saudável produz carne de excelência.
               </p>
               <p className="text-accent mb-6">
                 
@@ -95,7 +98,7 @@ Nosso time reúne zootecnistas, veterinários e engenheiros agrônomos, todos fo
               {/* Imagem de destaque ocupando duas colunas */}
               <div className="col-span-2 rounded-lg overflow-hidden shadow-md h-48 md:h-64">
                 <img
-                  src="/assets/pec1.jpeg"
+                  src="/assets/confinamento.jpg"
                   alt="Pecuária ISM"
                   className="w-full h-full object-cover"
                 />
@@ -110,7 +113,7 @@ Nosso time reúne zootecnistas, veterinários e engenheiros agrônomos, todos fo
               </div>
               <div className="rounded-lg overflow-hidden shadow-md">
                 <img
-                  src="/assets/pec3.jpeg"
+                  src="/assets/boi_pecuaria.jpeg"
                   alt="Manejo de gado"
                   className="w-full h-full object-cover"
                 />
@@ -123,7 +126,7 @@ Nosso time reúne zootecnistas, veterinários e engenheiros agrônomos, todos fo
             <div className="bg-neutral-light rounded-lg p-6 flex flex-col items-center text-center">
               <GiCow size={40} className="text-primary mb-4" /> {/* Ícone de vaca */}
               <h3 className="text-xl font-semibold mb-2">Saúde animal</h3>
-              <p className="text-accent">Peucupação e cuidado com a saúde animal.</p>
+              <p className="text-accent">Preucupação e cuidado com a saúde animal.</p>
             </div>
             <div className="bg-neutral-light rounded-lg p-6 flex flex-col items-center text-center">
               <Package size={40} className="text-primary mb-4" /> {/* Ícone de caixa */}
@@ -188,13 +191,16 @@ Nosso time reúne zootecnistas, veterinários e engenheiros agrônomos, todos fo
               </p>
               <p className="text-accent mb-6">
                 Cultivo de culturas com produtividade e sustentabilidade
-Nossa agricultura se destaca pelo cultivo de cana-de-açúcar, soja, sorgo, milho e milheto, escolhidos pela sua adaptabilidade e rendimento. Cada hectare é planejado para extrair o máximo de produtividade sem esgotar o solo, garantindo safras robustas e de qualidade consistente.
-
-Tecnologia a serviço da eficiência
-Investimos em sensores de umidade, drones para monitoramento e softwares de agricultura de precisão. Com isso, aplicamos água, fertilizantes e defensivos apenas onde e quando necessário, reduzindo custos, preservando recursos hídricos e minimizando o impacto ambiental.
-
-Sistema integrado e rotação inteligente
-Nosso sistema integrado permite alternar culturas de forma estratégica — milheto e sorgo preparam o solo para a soja, que por sua vez deixa terreno ideal para a cana. Essa rotação otimiza a fertilidade natural, controla pragas sem químicos excessivos e mantém a produtividade elevada ao longo dos anos.
+Nossa agricultura se destaca pelo cultivo de cana-de-açúcar, soja, sorgo, milho e milheto, 
+escolhidos pela sua adaptabilidade e rendimento. Cada hectare é planejado para extrair o máximo 
+de produtividade sem esgotar o solo, garantindo safras robustas e de qualidade consistente. Tecnologia a serviço da eficiência
+Investimos em sensores de umidade, drones para monitoramento e softwares de agricultura de precisão. 
+Com isso, aplicamos água, fertilizantes e defensivos apenas onde e quando necessário, reduzindo custos, 
+preservando recursos hídricos e minimizando o impacto ambiental.Sistema integrado e rotação inteligente
+Nosso sistema integrado permite alternar culturas de forma estratégica — milheto e sorgo preparam o solo para a soja, 
+que por sua vez deixa terreno ideal para a cana. 
+Essa rotação otimiza a fertilidade natural, controla pragas sem químicos excessivos e mantém a produtividade elevada 
+ao longo dos anos.
               </p>
               <p className="text-accent">
                 .
