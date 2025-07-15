@@ -556,6 +556,31 @@ app.delete('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
     console.error('Erro ao excluir usuário:', err);
     res.status(500).json({ error: 'Erro ao excluir usuário.' });
   }
+
+  app.patch('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
+  const { id } = req.params;
+  const { nome, login, role } = req.body;
+  if (!nome || !login || !role) return res.status(400).json({ error: 'Nome, login e cargo obrigatórios' });
+  try {
+    // Confere se já existe outro usuário com o mesmo login
+    const [rows] = await pool.query(
+      'SELECT id FROM users WHERE login = ? AND id <> ?',
+      [login, id]
+    );
+    if (rows.length > 0) return res.status(409).json({ error: 'Login já está em uso por outro usuário.' });
+
+    await pool.query(
+      'UPDATE users SET nome = ?, login = ?, role = ? WHERE id = ?',
+      [nome, login, role, id]
+    );
+    await registrarAuditoria(req.user.sub, 'editar_usuario', `Editou usuário id=${id}, login=${login}, role=${role}`);
+    res.json({ message: 'Usuário atualizado com sucesso!' });
+  } catch (err) {
+    console.error('Erro ao atualizar usuário:', err);
+    res.status(500).json({ error: 'Erro ao atualizar usuário.' });
+  }
+});
+
 });
 
 
