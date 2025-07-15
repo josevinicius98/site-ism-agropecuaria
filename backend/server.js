@@ -90,19 +90,27 @@ async function registrarAuditoria(usuarioId, acao, detalhes = '') {
 // --- Rota de auditoria ---
 // Apenas admin e rh podem acessar os logs de auditoria
 app.get('/api/auditoria', auth, onlyAdminRh, async (req, res) => {
+  const { usuario_id, acao, de, ate } = req.query;
+  let sql = `
+    SELECT a.id, a.acao, a.detalhes, a.data_hora, u.nome AS usuario_nome, u.login
+    FROM auditoria a
+    JOIN users u ON a.usuario_id = u.id
+    WHERE 1=1
+  `;
+  const params = [];
+  if (usuario_id) { sql += ' AND a.usuario_id = ?'; params.push(usuario_id); }
+  if (acao) { sql += ' AND a.acao = ?'; params.push(acao); }
+  if (de) { sql += ' AND a.data_hora >= ?'; params.push(de); }
+  if (ate) { sql += ' AND a.data_hora <= ?'; params.push(ate); }
+  sql += ' ORDER BY a.data_hora DESC LIMIT 200';
   try {
-    const [rows] = await pool.query(`
-      SELECT a.id, a.acao, a.detalhes, a.data_hora, u.nome AS usuario_nome, u.login
-      FROM auditoria a
-      JOIN users u ON a.usuario_id = u.id
-      ORDER BY a.data_hora DESC
-      LIMIT 200
-    `);
+    const [rows] = await pool.query(sql, params);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar logs de auditoria.' });
   }
 });
+
 
 // --- Cadastro de usuário ---
 app.post('/api/cadastrar', async (req, res) => {
@@ -518,6 +526,38 @@ app.get('/api/me', auth, async (req, res) => {
     res.status(500).json({ error: 'Erro ao buscar dados do usuário.' });
   }
 });
+
+// ROTA: Excluir usuário (apenas admin/rh)
+app.delete('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Busca o usuário antes de deletar para logar detalhes
+    const [rows] = await pool.query(
+      'SELECT nome, login FROM users WHERE id = ?',
+      [id]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    const excluido = rows[0];
+
+    // Exclui o usuário
+    await pool.query('DELETE FROM users WHERE id = ?', [id]);
+
+    // Registra auditoria
+    await registrarAuditoria(
+      req.userId,
+      'excluir_usuario',
+      `Excluiu o usuário "${excluido.nome}" (login: ${excluido.login}, id: ${id})`
+    );
+
+    res.sendStatus(204);
+  } catch (err) {
+    console.error('Erro ao excluir usuário:', err);
+    res.status(500).json({ error: 'Erro ao excluir usuário.' });
+  }
+});
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
