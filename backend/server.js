@@ -531,7 +531,6 @@ app.get('/api/me', auth, async (req, res) => {
 app.delete('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
   const { id } = req.params;
   try {
-    // Busca o usuário antes de deletar para logar detalhes
     const [rows] = await pool.query(
       'SELECT nome, login FROM users WHERE id = ?',
       [id]
@@ -541,12 +540,10 @@ app.delete('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
     }
     const excluido = rows[0];
 
-    // Exclui o usuário
     await pool.query('DELETE FROM users WHERE id = ?', [id]);
 
-    // Registra auditoria
     await registrarAuditoria(
-      req.userId,
+      req.user.sub,
       'excluir_usuario',
       `Excluiu o usuário "${excluido.nome}" (login: ${excluido.login}, id: ${id})`
     );
@@ -556,13 +553,17 @@ app.delete('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
     console.error('Erro ao excluir usuário:', err);
     res.status(500).json({ error: 'Erro ao excluir usuário.' });
   }
+});
 
-  app.patch('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
+// --- PATCH ATUALIZAÇÃO DE USUÁRIO ---
+app.patch('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
   const { id } = req.params;
-  const { nome, login, role } = req.body;
+  const { nome, login, role, status_usuario } = req.body;
   if (!nome || !login || !role) return res.status(400).json({ error: 'Nome, login e cargo obrigatórios' });
+  if (status_usuario && !['ativo', 'inativo'].includes(status_usuario)) {
+    return res.status(400).json({ error: 'Status inválido' });
+  }
   try {
-    // Confere se já existe outro usuário com o mesmo login
     const [rows] = await pool.query(
       'SELECT id FROM users WHERE login = ? AND id <> ?',
       [login, id]
@@ -570,19 +571,16 @@ app.delete('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
     if (rows.length > 0) return res.status(409).json({ error: 'Login já está em uso por outro usuário.' });
 
     await pool.query(
-      'UPDATE users SET nome = ?, login = ?, role = ? WHERE id = ?',
-      [nome, login, role, id]
+      'UPDATE users SET nome = ?, login = ?, role = ?, status_usuario = ? WHERE id = ?',
+      [nome, login, role, status_usuario || 'ativo', id]
     );
-    await registrarAuditoria(req.user.sub, 'editar_usuario', `Editou usuário id=${id}, login=${login}, role=${role}`);
+    await registrarAuditoria(req.user.sub, 'editar_usuario', `Editou usuário id=${id}, login=${login}, role=${role}, status=${status_usuario}`);
     res.json({ message: 'Usuário atualizado com sucesso!' });
   } catch (err) {
     console.error('Erro ao atualizar usuário:', err);
     res.status(500).json({ error: 'Erro ao atualizar usuário.' });
   }
 });
-
-});
-
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
