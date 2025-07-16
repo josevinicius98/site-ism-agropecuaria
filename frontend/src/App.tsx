@@ -23,6 +23,7 @@ import PainelAtendimentosPage from './pages/PainelAtendimentosPage'; // Importar
 import AtendimentoChatSuportePage from './pages/AtendimentoChatSuportePage'; // Importar a página de gestão de usuários
 import UserManagementPage from './pages/UserManagementPage'; // Importar a página de gestão de usuários
 import AuditoriaPage from './pages/AuditoriaPage'; // Importar a página de auditoria
+import UserEditPage from './pages/UserEditPage'; // Importar a página de edição de usuário
 
 // Criar um componente auxiliar para usar o hook useAuth
 const AppContent: React.FC = () => {
@@ -110,7 +111,8 @@ const AppContent: React.FC = () => {
               <PainelAtendimentosPage />
             </PrivateRoute> 
           } />
-          <Route path="/gestao-usuarios" element={<UserManagementPage />} /> {/* Página de gestão de usuários */}
+          <Route path="/gestao-usuarios" element={<UserManagementPage />} />
+          <Route path="/gestao-usuarios/:id" element={<UserEditPage />} />
           <Route path="/auditoria" element={<AuditoriaPage />} /> {/* Página de auditoria */}
 
         </Routes>
