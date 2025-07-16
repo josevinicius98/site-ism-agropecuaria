@@ -6,6 +6,7 @@ import {
   BarChart2, Megaphone, ShieldCheck, UserPlus, KeyRound,
   LogOut, Headset, Users2
 } from 'lucide-react';
+const { token, logout, user: initialUser } = useAuth();
 
 const Portal: React.FC = () => {
   const nav = useNavigate();
@@ -18,7 +19,11 @@ const Portal: React.FC = () => {
   const primaryColor = 'bg-[#070735] hover:bg-opacity-90';
 
   useEffect(() => {
-    fetch('/api/me')
+    fetch('/api/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data?.nome) setUserName(data.nome);
