@@ -557,6 +557,7 @@ app.delete('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
 
 // --- PATCH ATUALIZAÇÃO DE USUÁRIO ---
 app.patch('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
+  console.log('Body recebido no PATCH /api/users/:id:', req.body);
   const { id } = req.params;
   const { nome, login, role, status_usuario } = req.body;
   if (!nome || !login || !role) return res.status(400).json({ error: 'Nome, login e cargo obrigatórios' });
