@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
 import cron from 'node-cron';
-import cloudinary from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 
 const app = express();
 
@@ -19,7 +19,7 @@ app.use(express.json());
 const upload = multer({ storage: multer.memoryStorage() });
 
 // --- Cloudinary ---
-cloudinary.v2.config({
+cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
@@ -207,7 +207,7 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/alterar-senha', auth, async (req, res) => {
   try {
     const { senhaAtual, novaSenha } = req.body;
-    const userId = req.user.sub;
+    const userId = req.userId;
 
     if (!novaSenha) {
       return res.status(400).json({ error: 'A nova senha é obrigatória.' });
@@ -260,7 +260,7 @@ app.post('/api/alterar-senha', auth, async (req, res) => {
         primeiro_login: updatedUser.primeiro_login,
         status_usuario: updatedUser.status_usuario
       },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: '1h' }
     );
 
@@ -326,7 +326,7 @@ app.patch('/api/users/:id/password', auth, onlyAdminRh, async (req, res) => {
       [hash, targetId]
     );
     // AUDITORIA: admin/rh alterou senha de outro usuário
-    await registrarAuditoria(req.user.sub, 'admin_alterar_senha', `Alterou a senha do user_id=${targetId}`);
+    await registrarAuditoria(req.userId, 'admin_alterar_senha', `Alterou a senha do user_id=${targetId}`);
     res.sendStatus(204);
   } catch (err) {
     res.status(500).json({ error: 'Falha ao alterar senha do usuário.' });
@@ -345,7 +345,7 @@ app.patch('/api/users/:id/status', auth, onlyAdminRh, async (req, res) => {
       [status_usuario, userId]
     );
     // AUDITORIA: admin/rh ativou/inativou um usuário
-    await registrarAuditoria(req.user.sub, 'alterar_status_usuario', `Alterou status do user_id=${userId} para ${status_usuario}`);
+    await registrarAuditoria(req.userId, 'alterar_status_usuario', `Alterou status do user_id=${userId} para ${status_usuario}`);
     res.sendStatus(204);
   } catch (err) {
     res.status(500).json({ error: 'Falha ao atualizar status do usuário.' });
@@ -448,7 +448,7 @@ app.post('/api/atendimentos/:id/mensagens', auth, async (req, res) => {
       [id, remetente, mensagem]
     );
     // AUDITORIA: envio mensagem no chat
-    await registrarAuditoria(req.user.sub, 'enviar_mensagem', `Mensagem enviada no atendimento ${id}`);
+    await registrarAuditoria(req.userId, 'enviar_mensagem', `Mensagem enviada no atendimento ${id}`);
     res.status(201).json({ message: 'Mensagem enviada.' });
   } catch (err) {
     console.error('Erro ao enviar mensagem:', err);
@@ -488,7 +488,7 @@ app.post('/api/atendimentos/:id/upload', auth, upload.single('arquivo'), async (
     const remetente = ['admin', 'rh', 'compliance'].includes(req.role) ? 'suporte' : 'usuario';
 
     // Upload do arquivo para o Cloudinary
-    const result = await cloudinary.v2.uploader.upload(
+    const result = await cloudinary.uploader.upload(
       `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
       {
         folder: `ism-agropecuaria/atendimentos/${atendimentoId}`,
@@ -504,7 +504,7 @@ app.post('/api/atendimentos/:id/upload', auth, upload.single('arquivo'), async (
       [atendimentoId, remetente, JSON.stringify({ url: urlArquivo, nome: nomeArquivo }), 'arquivo']
     );
     // AUDITORIA: upload de arquivo no chat
-    await registrarAuditoria(req.user.sub, 'upload_arquivo', `Upload no atendimento ${atendimentoId}: ${nomeArquivo}`);
+    await registrarAuditoria(req.userId, 'upload_arquivo', `Upload no atendimento ${atendimentoId}: ${nomeArquivo}`);
     res.json({ url: urlArquivo, nome: nomeArquivo });
   } catch (err) {
     console.error('Erro ao enviar arquivo para Cloudinary ou DB:', err);
@@ -517,7 +517,7 @@ app.get('/api/me', auth, async (req, res) => {
   try {
     const [rows] = await pool.query(
       'SELECT id, nome, login, role, primeiro_login, status_usuario FROM users WHERE id = ?',
-      [req.user.sub]
+      [req.userId]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado.' });
     res.json(rows[0]);
@@ -543,7 +543,7 @@ app.delete('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
     await pool.query('DELETE FROM users WHERE id = ?', [id]);
 
     await registrarAuditoria(
-      req.user.sub,
+      req.userId,
       'excluir_usuario',
       `Excluiu o usuário "${excluido.nome}" (login: ${excluido.login}, id: ${id})`
     );
@@ -574,7 +574,7 @@ app.patch('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
       'UPDATE users SET nome = ?, login = ?, role = ?, status_usuario = ? WHERE id = ?',
       [nome, login, role, status_usuario || 'ativo', id]
     );
-    await registrarAuditoria(req.user.sub, 'editar_usuario', `Editou usuário id=${id}, login=${login}, role=${role}, status=${status_usuario}`);
+    await registrarAuditoria(req.userId, 'editar_usuario', `Editou usuário id=${id}, login=${login}, role=${role}, status=${status_usuario}`);
     res.json({ message: 'Usuário atualizado com sucesso!' });
   } catch (err) {
     console.error('Erro ao atualizar usuário:', err);
