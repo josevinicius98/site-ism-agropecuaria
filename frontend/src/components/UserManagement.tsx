@@ -20,7 +20,6 @@ const cargos = [
 const UserManagement: React.FC = () => {
   const { token } = useAuth();
   const [users, setUsers] = useState<Usuario[]>([]);
-  const [senhaNova, setSenhaNova] = useState<{ [id: number]: string }>({});
   const [msg, setMsg] = useState('');
   const [msgType, setMsgType] = useState<'success' | 'error'>('success');
   const [loading, setLoading] = useState(false);
@@ -32,29 +31,31 @@ const UserManagement: React.FC = () => {
   // Edição de campos
   const [editFields, setEditFields] = useState<{ [id: number]: Partial<Usuario> }>({});
 
-  // Busca inicial de usuários
-  useEffect(() => {
+  // Função para carregar usuários
+  const loadUsers = async () => {
     if (!token) return;
     setLoading(true);
-    fetch('/api/users', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(res => {
-        setLoading(false);
-        if (res.status === 401) throw new Error('Sessão expirada, faça login novamente.');
-        return res.json();
-      })
-      .then(data => {
-        if (!Array.isArray(data)) throw new Error('Falha ao buscar usuários');
-        setUsers(data);
-      })
-      .catch(err => {
-        setMsg(err.message);
-        setMsgType('error');
+    try {
+      const res = await fetch('/api/users', {
+        headers: { Authorization: `Bearer ${token}` }
       });
+      if (res.status === 401) throw new Error('Sessão expirada, faça login novamente.');
+      const data = await res.json();
+      if (!Array.isArray(data)) throw new Error('Falha ao buscar usuários');
+      setUsers(data);
+    } catch (err: any) {
+      setMsg(err.message);
+      setMsgType('error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUsers();
   }, [token]);
 
-  // Limpa mensagens após 3,5s
+  // Limpa mensagens
   useEffect(() => {
     if (msg) {
       const t = setTimeout(() => setMsg(''), 3500);
@@ -66,7 +67,7 @@ const UserManagement: React.FC = () => {
     setEditFields(e => ({ ...e, [id]: { ...e[id], [field]: value } }));
   };
 
-  // Salva alterações e envia todos os campos obrigatórios
+  // Salvar edição e recarregar lista
   const salvarEdicao = async (id: number) => {
     const campos = editFields[id];
     if (!campos) return;
@@ -85,7 +86,7 @@ const UserManagement: React.FC = () => {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`
       },
       body: JSON.stringify(payload)
     });
@@ -94,18 +95,21 @@ const UserManagement: React.FC = () => {
     if (res.ok) {
       setMsg('Usuário atualizado!');
       setMsgType('success');
-      setUsers(users.map(u => u.id === id ? { ...u, ...payload } : u));
+      // Recarrega da API para garantir sincronia completa
+      await loadUsers();
+      // Fecha o modo de edição deste ID
       setEditFields(e => {
         const { [id]: _, ...rest } = e;
         return rest;
       });
     } else {
-      setMsg('Erro ao atualizar usuário');
+      const err = await res.json().catch(() => null);
+      setMsg(err?.error ?? 'Erro ao atualizar usuário');
       setMsgType('error');
     }
   };
 
-  // Filtra antes de renderizar
+  // Aplica filtros
   const usuariosFiltrados = users
     .filter(u => u.nome.toLowerCase().includes(filtroNome.toLowerCase()))
     .filter(u => filtroStatus === 'todos' || u.status_usuario === filtroStatus);
@@ -146,7 +150,7 @@ const UserManagement: React.FC = () => {
         </select>
       </div>
 
-      {/* Tabela de usuários */}
+      {/* Tabela */}
       <div className="overflow-x-auto">
         <table className="min-w-full text-left text-sm border rounded-xl">
           <thead className="bg-[#eaf2ff]">
