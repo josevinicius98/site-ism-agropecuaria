@@ -6,11 +6,10 @@ import {
   BarChart2, Megaphone, ShieldCheck, UserPlus, KeyRound,
   LogOut, Headset, Users2
 } from 'lucide-react';
-const { token, logout, user: initialUser } = useAuth();
 
 const Portal: React.FC = () => {
   const nav = useNavigate();
-  const { logout, user: initialUser } = useAuth();
+  const { token, logout, user: initialUser } = useAuth();
   const [userName, setUserName] = useState<string>(initialUser?.nome || '');
   const userRole = initialUser?.role || '';
 
