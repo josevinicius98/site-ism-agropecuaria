@@ -1,4 +1,5 @@
 // backend/server.js
+
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
@@ -555,27 +556,70 @@ app.delete('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
   }
 });
 
-// --- PATCH ATUALIZAÇÃO DE USUÁRIO ---
+// GET usuário por ID (para popular formulário de edição)
+app.get('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, nome, login, role, status_usuario FROM users WHERE id = ?',
+      [id]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Erro ao buscar usuário por ID:', err);
+    res.status(500).json({ error: 'Erro ao buscar usuário.' });
+  }
+});
+
+// PATCH atualização parcial (status_usuario opcional)
 app.patch('/api/users/:id', auth, onlyAdminRh, async (req, res) => {
   console.log('Body recebido no PATCH /api/users/:id:', req.body);
   const { id } = req.params;
   const { nome, login, role, status_usuario } = req.body;
-  if (!nome || !login || !role) return res.status(400).json({ error: 'Nome, login e cargo obrigatórios' });
+
+  if (!nome || !login || !role) {
+    return res.status(400).json({ error: 'Nome, login e cargo obrigatórios' });
+  }
+
+  // valida status se presente
   if (status_usuario && !['ativo', 'inativo'].includes(status_usuario)) {
     return res.status(400).json({ error: 'Status inválido' });
   }
+
   try {
-    const [rows] = await pool.query(
+    // checa login duplicado
+    const [dup] = await pool.query(
       'SELECT id FROM users WHERE login = ? AND id <> ?',
       [login, id]
     );
-    if (rows.length > 0) return res.status(409).json({ error: 'Login já está em uso por outro usuário.' });
+    if (dup.length > 0) {
+      return res.status(409).json({ error: 'Login já está em uso por outro usuário.' });
+    }
 
-    await pool.query(
-      'UPDATE users SET nome = ?, login = ?, role = ?, status_usuario = ? WHERE id = ?',
-      [nome, login, role, status_usuario || 'ativo', id]
+    // monta SQL dinâmico
+    const params = [nome, login, role];
+    let sql = 'UPDATE users SET nome = ?, login = ?, role = ?';
+
+    if (status_usuario !== undefined) {
+      sql += ', status_usuario = ?';
+      params.push(status_usuario);
+    }
+
+    sql += ' WHERE id = ?';
+    params.push(id);
+
+    await pool.query(sql, params);
+
+    await registrarAuditoria(
+      req.userId,
+      'editar_usuario',
+      `Editou usuário id=${id}, login=${login}, role=${role}` +
+        (status_usuario !== undefined ? `, status=${status_usuario}` : '')
     );
-    await registrarAuditoria(req.userId, 'editar_usuario', `Editou usuário id=${id}, login=${login}, role=${role}, status=${status_usuario}`);
+
     res.json({ message: 'Usuário atualizado com sucesso!' });
   } catch (err) {
     console.error('Erro ao atualizar usuário:', err);
