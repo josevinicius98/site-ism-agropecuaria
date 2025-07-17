@@ -98,14 +98,15 @@ const AboutPage: React.FC = () => {
                 <Target size={30} className="text-white" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Missão</h3>
-              <p className="text-gray-700">Fomentar o agronegócio com qualidade, legado familiar e inovação sustentável.</p>
+              <p className="text-gray-700">Produzir o desenvolvimento do agronegócio através do legado familiar, gerando alimentos de qualidade e fomentando a cadeia produtiva.</p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-8 text-center">
               <div className="w-16 h-16 bg-primary rounded-full mx-auto mb-4 flex items-center justify-center">
                 <Lightbulb size={30} className="text-white" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Visão</h3>
-              <p className="text-gray-700">Ser referência nacional em gestão familiar e tecnologia no campo.</p>
+              <p className="text-gray-700">Ser referência no agronegócio brasileiro através da gestão familiar,
+                trabalhando com eficiência, desenvolvimento e tecnologia.</p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-8 text-center">
               <div className="w-16 h-16 bg-primary rounded-full mx-auto mb-4 flex items-center justify-center">
