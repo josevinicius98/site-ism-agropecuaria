@@ -126,7 +126,7 @@ O compromisso é simples: gado saudável produz carne de excelência.
             <div className="bg-neutral-light rounded-lg p-6 flex flex-col items-center text-center">
               <GiCow size={40} className="text-primary mb-4" /> {/* Ícone de vaca */}
               <h3 className="text-xl font-semibold mb-2">Saúde animal</h3>
-              <p className="text-accent">Preucupação e cuidado com a saúde animal.</p>
+              <p className="text-accent">Preocupação e cuidado com a saúde animal.</p>
             </div>
             <div className="bg-neutral-light rounded-lg p-6 flex flex-col items-center text-center">
               <Package size={40} className="text-primary mb-4" /> {/* Ícone de caixa */}

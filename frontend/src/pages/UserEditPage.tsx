@@ -25,6 +25,7 @@ const UserEditPage: React.FC = () => {
 
   const [origUser, setOrigUser] = useState<Usuario | null>(null);
   const [form, setForm] = useState<Partial<Usuario>>({});
+  const [newPassword, setNewPassword] = useState('');
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -70,7 +71,7 @@ const UserEditPage: React.FC = () => {
     }
     setLoading(true);
 
-    // Sempre envia os campos obrigatórios, status só se mudou
+    // Atualização de dados principais
     const payload: any = {
       nome: form.nome,
       login: form.login,
@@ -92,10 +93,31 @@ const UserEditPage: React.FC = () => {
     setLoading(false);
 
     if (res.ok) {
-      setMsg('Usuário salvo com sucesso!');
-      setTimeout(() => nav('/gestao-usuarios'), 1000);
+      setMsg('Dados salvos com sucesso!');
     } else {
-      setMsg(json?.error || 'Erro ao salvar.');
+      setMsg(json?.error || 'Erro ao salvar dados.');
+      return;
+    }
+
+    // Se houver nova senha, atualiza também
+    if (newPassword) {
+      setLoading(true);
+      const passRes = await fetch(`/api/users/${id}/password`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ password: newPassword }),
+      });
+      setLoading(false);
+      if (passRes.ok) {
+        setMsg('Senha atualizada com sucesso!');
+        setNewPassword('');
+      } else {
+        const pjson = await passRes.json().catch(() => null);
+        setMsg(pjson?.error || 'Erro ao atualizar senha.');
+      }
     }
   };
 
@@ -120,10 +142,10 @@ const UserEditPage: React.FC = () => {
       {msg && (
         <div
           className={`mb-4 px-4 py-2 rounded ${
-msg.startsWith('Usuário salvo')
-                ? 'bg-green-100 text-green-800 border border-green-200'
-                : 'bg-red-100 text-red-800 border border-red-200'
-            }`}
+            msg.includes('sucesso')
+              ? 'bg-green-100 text-green-800 border border-green-200'
+              : 'bg-red-100 text-red-800 border border-red-200'
+          }`}
         >
           {msg}
         </div>
@@ -171,6 +193,16 @@ msg.startsWith('Usuário salvo')
             <option value="ativo">Ativo</option>
             <option value="inativo">Inativo</option>
           </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium">Nova Senha</label>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
+            placeholder="Deixe em branco para não alterar"
+            className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500 p-2"
+          />
         </div>
       </div>
       <div className="mt-6 flex justify-between">
