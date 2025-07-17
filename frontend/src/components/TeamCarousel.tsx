@@ -8,7 +8,7 @@ import ActivityCard from './ActivityCard'; // seu card existente
 // Dados iniciais (10 fotos) {/*caso queria escrever um título na foto escrever dento do ''*/},
 const photos = [
   { id: 1, src: '../assets/gado_comendo.jpeg', name: '' }, 
-  { id: 2, src: '../assets/gustavo_agricultura.jpeg', name: '' },
+  { id: 2, src: '../assets/gustavojordan_pecuaria.jpeg', name: '' },
   { id: 3, src: '../assets/pulverizador.jpeg', name: '' }, 
   { id: 4, src: '../assets/trator_verde1.jpeg', name: '' }, 
   { id: 5, src: '../assets/homem_seringa.jpeg', name: '' }, 
@@ -27,7 +27,7 @@ const TeamCarousel: React.FC = () => {
     infinite: true,           // loop infinito
     speed: 10,               // velocidade da transição
     slidesToShow: 5,          // quantos cards aparecem ao mesmo tempo
-    slidesToScroll: 2,        // quantos pula a cada scroll
+    slidesToScroll: 1,        // quantos pula a cada scroll
     autoplay: true,           // autoplay ligado
     autoplaySpeed: 2000,      // 3s entre trocas
     responsive: [             // responsividade

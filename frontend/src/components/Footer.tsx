@@ -114,7 +114,7 @@ const Footer: React.FC<FooterProps> = ({ setCurrentPage }) => {
               </a>
               {/* Botão do LinkedIn */}
               <a
-                href="https://contate.me/ios/ismagropecuaria"  // contato
+                href="https://wa.me/5534998568392"  // contato
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-primary-light hover:bg-secondary hover:text-primary flex items-center justify-center rounded-full transition-colors duration-300"
