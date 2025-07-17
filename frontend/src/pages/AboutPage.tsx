@@ -36,7 +36,7 @@ const AboutPage: React.FC = () => {
                 de forma a disseminar sua cultura aos colaboradores, visando desenvolvimento, progresso e qualidade de vida.
                 ISM= Irmãos Silva Machado e representa uma empresa familiar, cujo legado vem sendo propagado 
                 há mais de 40 anos e que hoje, é gerida por Rafael, Otávio e Aldiberto Jr. A família Silva Machado 
-                foi constituída há quatro décadas a partir da união de Gonia Maria  e Aldiberto Dia.
+                foi constituída há quatro décadas a partir da união de Gonia Maria  e Aldiberto Dias.
                 A ISM atua no ramo da agricultura e da pecuária, na região do Triângulo Mineiro. 
                 Na agricultura com soja, sorgo, milho, milheto e cana-de-açúcar e no ramo da Pecuária, envolve os processos de recria e 
                 engorda, contribuindo com o desenvolvimento da economia na região.
